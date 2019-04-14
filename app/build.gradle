@@ -1,0 +1,54 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        applicationId "com.suda.datetimewallpaper"
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 11
+        versionName "1.91"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+    Properties props = new Properties()
+    props.load(new FileInputStream('/Users/guhaibo/AndroidStudioProjects/as/JzApp/app/signing.properties'))
+
+    signingConfigs {
+        myConfig {
+            storeFile file('/Users/guhaibo/AndroidStudioProjects/as/JzApp/app/suda.jks')
+            storePassword props['KEY_PASSWORD']
+            keyAlias props['KEY_ALIAS']
+            keyPassword props['KEYSTORE_PASSWORD']
+        }
+    }
+
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            shrinkResources true
+            signingConfig signingConfigs.myConfig
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            signingConfig signingConfigs.myConfig
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+//    implementation"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+//    testImplementation 'junit:junit:4.12'
+//    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+//    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    implementation 'com.github.bumptech.glide:glide:4.9.0'
+    annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    implementation 'com.zhihu.android:matisse:0.5.2-beta3'
+    implementation 'com.github.QuadFlask:colorpicker:0.0.13'
+    implementation 'pub.devrel:easypermissions:3.0.0'
+    implementation  'com.umeng.umsdk:analytics:7.5.4'
+    implementation  'com.umeng.umsdk:common:1.5.4'
+}

@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">时间轮盘</string>
+    <string name="storage_permission">时间轮盘需要存储权限选择图片</string>
+    <plurals name="error_over_count">
+        <item quantity="one">You can only select one media file</item>
+        <item quantity="many">You can only select up to %1$d media files</item>
+    </plurals>
+</resources>
