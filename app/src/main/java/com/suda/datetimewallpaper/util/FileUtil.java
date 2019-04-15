@@ -1,12 +1,46 @@
 package com.suda.datetimewallpaper.util;
 
-import java.io.*;
+import android.os.Environment;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 /**
  * @author guhaibo
  * @date 2019/4/13
  */
 public class FileUtil {
+
+    public static File getBaseFile() {
+        File file = new File(Environment.getExternalStorageDirectory(), "时间轮盘");
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        return file;
+    }
+
+    public static String getFromFile(File file) {
+        try {
+            FileInputStream input = new FileInputStream(file);
+            InputStreamReader inputReader = new InputStreamReader(input);
+            BufferedReader bufReader = new BufferedReader(inputReader);
+            String line = "";
+            String result = "";
+            while ((line = bufReader.readLine()) != null) {
+                result += line;
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
 
     public static void copyFile(File sourceFile, File targetFile)
             throws IOException {

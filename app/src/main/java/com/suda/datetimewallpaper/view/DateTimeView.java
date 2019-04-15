@@ -28,8 +28,8 @@ final public class DateTimeView extends SurfaceView implements SurfaceHolder.Cal
         this.getHolder().addCallback(this);
     }
 
-    public void resetConf() {
-        dateTimeDrawer.resetConf();
+    public void resetConf(boolean force) {
+        dateTimeDrawer.resetConf(force);
     }
 
     @Override

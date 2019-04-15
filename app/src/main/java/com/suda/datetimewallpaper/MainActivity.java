@@ -7,11 +7,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -19,6 +22,8 @@ import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
 import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
+import com.suda.datetimewallpaper.about.AboutActivity;
+import com.suda.datetimewallpaper.adapter.CusAdapter;
 import com.suda.datetimewallpaper.util.AlipayDonate;
 import com.suda.datetimewallpaper.util.Glide4Engine;
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil;
@@ -34,12 +39,14 @@ import java.util.HashSet;
 import java.util.Set;
 
 import androidx.appcompat.app.AppCompatActivity;
+import me.drakeet.materialdialog.MaterialDialog;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
 
 import static com.suda.datetimewallpaper.util.FileUtil.copyFile;
 import static com.suda.datetimewallpaper.util.SharedPreferencesUtil.SP_BG_COLOR;
 import static com.suda.datetimewallpaper.util.SharedPreferencesUtil.SP_BG_IMAGE;
+import static com.suda.datetimewallpaper.util.SharedPreferencesUtil.SP_CUS_CONF;
 import static com.suda.datetimewallpaper.util.SharedPreferencesUtil.SP_HIDE_ACT;
 import static com.suda.datetimewallpaper.util.SharedPreferencesUtil.SP_NUM_FORMAT;
 import static com.suda.datetimewallpaper.util.SharedPreferencesUtil.SP_TEXT_COLOR;
@@ -52,8 +59,9 @@ import static com.suda.datetimewallpaper.util.SharedPreferencesUtil.SP_VERTICAL_
 public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
     private final int REQUEST_CODE_SET_WALLPAPER = 0x001;
     private final int REQUEST_CODE_CHOOSE = 0x002;
-
     private final int REQUEST_CODE_PERMISSION = 0x004;
+    private final int REQUEST_CODE_PERMISSION2 = 0x005;
+
 
     DateTimeView dateTimeView;
 
@@ -74,7 +82,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 SharedPreferencesUtil.putData(SP_NUM_FORMAT, isChecked);
-                dateTimeView.resetConf();
+                dateTimeView.resetConf(true);
             }
         });
 
@@ -86,9 +94,10 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 SharedPreferencesUtil.putData(SP_HIDE_ACT, isChecked);
                 setExcludeFromRecents(isChecked);
-                dateTimeView.resetConf();
+                dateTimeView.resetConf(false);
             }
         });
+        showHideNumFormat();
 
         setExcludeFromRecents(cbHideAct.isChecked());
     }
@@ -130,7 +139,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 SharedPreferencesUtil.putData(SharedPreferencesUtil.SP_SCALE, progress * 1.0f / 100);
                 break;
         }
-        dateTimeView.resetConf();
+        dateTimeView.resetConf(false);
     }
 
     @Override
@@ -166,7 +175,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     @Override
                     public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                         SharedPreferencesUtil.putData(SP_TEXT_COLOR, selectedColor);
-                        dateTimeView.resetConf();
+                        dateTimeView.resetConf(false);
                     }
                 })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -223,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
                         SharedPreferencesUtil.putData(SP_BG_COLOR, selectedColor);
                         SharedPreferencesUtil.putData(SP_BG_IMAGE, "");
-                        dateTimeView.resetConf();
+                        dateTimeView.resetConf(false);
                     }
                 })
                 .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
@@ -245,10 +254,105 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 //        }
     }
 
+    public void about(View view) {
+        Intent intent = new Intent(this, AboutActivity.class);
+        startActivity(intent);
+    }
+
     public void donateZFB(View view) {
-        boolean hasInstalledAlipayClient = AlipayDonate.hasInstalledAlipayClient(this);
-        if (hasInstalledAlipayClient) {
-            AlipayDonate.startAlipayClient(this, "apqiqql0hgh5pmv54d");
+        final MaterialDialog outDialog = new MaterialDialog(this);
+        outDialog.setTitle("谢谢支持");
+        outDialog.setMessage("软件完全免费，如果您觉得软件不错，可以打赏支持哦😜");
+        outDialog.setPositiveButton("我要打赏", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean hasInstalledAlipayClient = AlipayDonate.hasInstalledAlipayClient(MainActivity.this);
+                if (hasInstalledAlipayClient) {
+                    AlipayDonate.startAlipayClient(MainActivity.this, "apqiqql0hgh5pmv54d");
+                }
+                Toast.makeText(MainActivity.this, "谢谢支持", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        outDialog.setNegativeButton("下次再说", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                outDialog.dismiss();
+            }
+        });
+        outDialog.show();
+    }
+
+    public void setCusConf(View view) {
+        setCusConf();
+    }
+
+    public void setCusConfHelp(View view) {
+        Intent intent = new Intent();
+        intent.setAction("android.intent.action.VIEW");
+        Uri content_url = Uri.parse("https://github.com/ghbhaha/DateTimewallpaper_Communication/issues/1");
+        intent.setData(content_url);
+        startActivity(intent);
+    }
+
+    private void showHideNumFormat() {
+        if ("".equals(SharedPreferencesUtil.getData(SP_CUS_CONF, ""))) {
+            findViewById(R.id.cb_num_format).setVisibility(View.VISIBLE);
+        } else {
+            findViewById(R.id.cb_num_format).setVisibility(View.GONE);
+        }
+    }
+
+    @AfterPermissionGranted(REQUEST_CODE_PERMISSION2)
+    private void setCusConf() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            final MaterialDialog outDialog = new MaterialDialog(this);
+            outDialog.setTitle("选择配置");
+            ListView listView = new ListView(this);
+            final CusAdapter restoreAdapter = new CusAdapter();
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    outDialog.dismiss();
+                    final File file = (File) restoreAdapter.getItem(position);
+                    final MaterialDialog innerDialog = new MaterialDialog(MainActivity.this);
+                    innerDialog.setTitle("确认选择配置");
+                    if (file == null) {
+                        innerDialog.setMessage("选择配置:" + "恢复默认");
+                    } else {
+                        innerDialog.setMessage("选择配置:" + file.getName());
+                    }
+                    innerDialog.setNegativeButton("否", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            innerDialog.dismiss();
+                        }
+                    });
+
+                    innerDialog.setPositiveButton("是", new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (file == null) {
+                                SharedPreferencesUtil.putData(SP_CUS_CONF, "");
+                            } else {
+                                SharedPreferencesUtil.putData(SP_CUS_CONF, file.getAbsolutePath());
+                            }
+                            showHideNumFormat();
+                            dateTimeView.resetConf(true);
+                            innerDialog.dismiss();
+                        }
+                    });
+                    innerDialog.show();
+                }
+            });
+            listView.setAdapter(restoreAdapter);
+            outDialog.setContentView(listView);
+            outDialog.setCanceledOnTouchOutside(true);
+            outDialog.show();
+        } else {
+            EasyPermissions.requestPermissions(this, getString(R.string.storage_permission),
+                    REQUEST_CODE_PERMISSION2, perms);
         }
     }
 
