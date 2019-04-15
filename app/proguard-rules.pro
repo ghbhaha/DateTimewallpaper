@@ -367,3 +367,6 @@ public static java.lang.String TABLENAME;
 -keep public class com.suda.datetimewallpaper.R$*{
 public static final int *;
 }
+
+
+-keep class com.suda.datetimewallpaper.bean.** { *;}

@@ -179,7 +179,7 @@ public class AboutActivity extends MaterialAboutActivity {
                                 });
                                 innerDialog.show();
                             } else {
-                                Toast.makeText(context, "未检测到更新", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(context, "未检查到更新", Toast.LENGTH_SHORT).show();
                             }
                         } catch (Exception e) {
                             Toast.makeText(context, "请求失败,请稍后重试", Toast.LENGTH_SHORT).show();

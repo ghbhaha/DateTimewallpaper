@@ -7,14 +7,16 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
@@ -25,6 +27,8 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.suda.datetimewallpaper.about.AboutActivity;
 import com.suda.datetimewallpaper.adapter.CusAdapter;
 import com.suda.datetimewallpaper.util.AlipayDonate;
+import com.suda.datetimewallpaper.util.DownUtil;
+import com.suda.datetimewallpaper.util.FileUtil;
 import com.suda.datetimewallpaper.util.Glide4Engine;
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil;
 import com.suda.datetimewallpaper.util.WallpaperUtil;
@@ -61,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     private final int REQUEST_CODE_CHOOSE = 0x002;
     private final int REQUEST_CODE_PERMISSION = 0x004;
     private final int REQUEST_CODE_PERMISSION2 = 0x005;
+    private final int REQUEST_CODE_PERMISSION3 = 0x006;
 
 
     DateTimeView dateTimeView;
@@ -283,17 +288,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         outDialog.show();
     }
 
-    public void setCusConf(View view) {
-        setCusConf();
-    }
-
-    public void setCusConfHelp(View view) {
-        Intent intent = new Intent();
-        intent.setAction("android.intent.action.VIEW");
-        Uri content_url = Uri.parse("https://github.com/ghbhaha/DateTimewallpaper_Communication/issues/1");
-        intent.setData(content_url);
-        startActivity(intent);
-    }
 
     private void showHideNumFormat() {
         if ("".equals(SharedPreferencesUtil.getData(SP_CUS_CONF, ""))) {
@@ -302,6 +296,89 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             findViewById(R.id.cb_num_format).setVisibility(View.GONE);
         }
     }
+
+    public void setCusConfFromNet(View view) {
+        setCusConfFromNet();
+    }
+
+    @AfterPermissionGranted(REQUEST_CODE_PERMISSION3)
+    public void setCusConfFromNet() {
+        String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        if (EasyPermissions.hasPermissions(this, perms)) {
+            final MaterialDialog outDialog = new MaterialDialog(this);
+            outDialog.setTitle("请输入下载直链");
+            final EditText editText = new EditText(this);
+            outDialog.setContentView(editText);
+            editText.setBackgroundColor(getResources().getColor(R.color.dracula_page_bg));
+            editText.setFocusable(true);
+            editText.setHint("请输入下载链接");
+            outDialog.setCanceledOnTouchOutside(true);
+            outDialog.setPositiveButton("导入", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    String url = editText.getText().toString();
+                    if (TextUtils.isEmpty(url)) {
+                        Toast.makeText(MainActivity.this, "请求不能为空", Toast.LENGTH_SHORT).show();
+                        return;
+                    } else if (url.lastIndexOf(".json") < 0) {
+                        Toast.makeText(MainActivity.this, "链接请以.json结尾", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    String fileName = url.substring(url.lastIndexOf("/") + 1, url.length());
+                    final File file = new File(FileUtil.getBaseFile(), fileName);
+
+                    if (file.exists()) {
+                        Toast.makeText(MainActivity.this, "已存在" + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+
+                    final MaterialDialog loadDialog = new MaterialDialog(MainActivity.this);
+                    loadDialog.setContentView(new ProgressBar(MainActivity.this));
+                    loadDialog.setTitle("正在下载");
+                    loadDialog.show();
+
+                    DownUtil.downLoadFile(url, file, new DownUtil.ReqCallBack() {
+                        @Override
+                        public void showResult(final int code) {
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    loadDialog.dismiss();
+                                    if (code == 1) {
+                                        if (file.exists()) {
+                                            SharedPreferencesUtil.putData(SP_CUS_CONF, file.getAbsolutePath());
+                                            dateTimeView.resetConf(true);
+                                            Toast.makeText(MainActivity.this, "导入成功", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            Toast.makeText(MainActivity.this, "导入失败", Toast.LENGTH_SHORT).show();
+                                        }
+                                    } else {
+                                        Toast.makeText(MainActivity.this, "导入失败", Toast.LENGTH_SHORT).show();
+                                    }
+                                }
+                            });
+                        }
+                    });
+                    outDialog.dismiss();
+                }
+            });
+            outDialog.setNegativeButton("取消", new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    outDialog.dismiss();
+                }
+            });
+            outDialog.show();
+        } else {
+            EasyPermissions.requestPermissions(this, getString(R.string.storage_permission),
+                    REQUEST_CODE_PERMISSION3, perms);
+        }
+    }
+
+    public void setCusConf(View view) {
+        setCusConf();
+    }
+
 
     @AfterPermissionGranted(REQUEST_CODE_PERMISSION2)
     private void setCusConf() {

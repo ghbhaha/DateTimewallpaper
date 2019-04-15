@@ -193,7 +193,7 @@
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_weight="1"
                 android:onClick="setCusConf"
-                android:text="自定义" />
+                android:text="本地配置" />
 
 
             <Button
@@ -201,8 +201,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom|center_horizontal"
                 android:layout_weight="1"
-                android:onClick="setCusConfHelp"
-                android:text="自定义教程" />
+                android:onClick="setCusConfFromNet"
+                android:text="导入网络配置" />
 
 
             <Button
