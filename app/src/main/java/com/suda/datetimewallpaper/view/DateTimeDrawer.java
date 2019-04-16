@@ -71,12 +71,13 @@ final public class DateTimeDrawer {
     private float scale = 0f;
 
     private int textColor = Color.WHITE;
+    private int darkenTextColor = Color.WHITE;
     private int bgColor = Color.BLACK;
 
     private String bgImg = "";
     private Bitmap bgBitmap;
 
-    private int schedule = 10;
+    private int schedule = 16;
 
     private int monthIndex = 0;
     private int dayIndex = 0;
@@ -98,6 +99,8 @@ final public class DateTimeDrawer {
     private Date current;
 
     Typeface cusTypeFace;
+
+    boolean changeConf = false;
 
     private TimerTask refreshTask = new TimerTask() {
         @Override
@@ -131,8 +134,17 @@ final public class DateTimeDrawer {
 
 
             //处理动画
-            secondDelta = (System.currentTimeMillis() % 1000) * 1.0f / (schedule * 30);
-            if (secondDelta > 1f) {
+            float sd = (System.currentTimeMillis() % 1000) * 1.0f / (schedule * 25);
+
+            //静止时不再绘制，降低功耗
+            if (secondDelta == 0 && sd > 1 && !changeConf) {
+                return;
+            }
+
+            changeConf = false;
+
+            secondDelta = sd;
+            if (sd > 1f) {
                 secondDelta = 1f;
             }
             secondDelta = secondDelta - 1;
@@ -282,14 +294,17 @@ final public class DateTimeDrawer {
             matrix.postScale(scale * this.scale, scale * this.scale, width * horizontalPos, height * verticalPos);
             canvas.setMatrix(matrix);
 
-            if (delta == -1f || delta == 0f) {
-                clockPaint.setColor(index == curIndex ? textColor : darkenColor(textColor));
+            if ("text".equals(textBean.getType())) {
+                clockPaint.setColor(textColor);
             } else {
-                clockPaint.setColor(darkenColor(textColor));
+                if (delta == -1f || delta == 0f) {
+                    clockPaint.setColor(index == curIndex ? textColor : darkenTextColor);
+                } else {
+                    clockPaint.setColor(darkenTextColor);
+                }
             }
 
             clockPaint.setTypeface(textBean.getUseCusFont() == 1 ? cusTypeFace : null);
-
             canvas.drawText(str, 0, baseline, clockPaint);
             degree += addD;
             index++;
@@ -322,9 +337,12 @@ final public class DateTimeDrawer {
         rotate = (float) SharedPreferencesUtil.getData(SP_ROTATE, 0f);
         scale = 2 * (float) SharedPreferencesUtil.getData(SP_SCALE, 0.25f) + 0.5f;
         textColor = (int) SharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.WHITE);
+        darkenTextColor = darkenColor(textColor);
         if (force) {
-            setCircleTextFormat();
+            drawStr = "";
         }
+        changeConf = true;
+        setCircleTextFormat();
         setBg();
         start.set(true);
     }
