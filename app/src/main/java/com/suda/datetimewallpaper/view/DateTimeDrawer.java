@@ -17,6 +17,7 @@ import android.view.WindowManager;
 import android.widget.Toast;
 
 import com.alibaba.fastjson.JSON;
+import com.suda.datetimewallpaper.R;
 import com.suda.datetimewallpaper.bean.DrawBean;
 import com.suda.datetimewallpaper.bean.TextBean;
 import com.suda.datetimewallpaper.util.AssetsUtil;
@@ -220,7 +221,6 @@ final public class DateTimeDrawer {
      */
     private void drawCircle(Canvas canvas) {
         for (TextBean textBean : drawBean.getCircleText()) {
-            float radius = textBean.getDis();
             Index index = getIndex(textBean);
             clockPaint.setFakeBoldText(textBean.getBold() == 1);
             clockPaint.setTextSize(drawBean.getCircleTextSize());
@@ -236,7 +236,7 @@ final public class DateTimeDrawer {
             for (String str : textBean.getArray()) {
                 matrix.reset();
                 matrix.postTranslate(width * horizontalPos, height * verticalPos);
-                matrix.postTranslate(radius, 0);
+                matrix.postTranslate(textBean.getDis(), 0);
                 matrix.postRotate(degree + rotate * 360, width * horizontalPos, height * verticalPos);
                 matrix.postScale(scale * this.scale, scale * this.scale, width * horizontalPos, height * verticalPos);
                 canvas.setMatrix(matrix);
@@ -346,7 +346,7 @@ final public class DateTimeDrawer {
                 try {
                     drawBean = JSON.parseObject(FileUtil.getFromFile(new File(drawConfName)), DrawBean.class);
                 } catch (Exception e) {
-                    Toast.makeText(context, "您的配置有问题", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(context, R.string.conf_error, Toast.LENGTH_SHORT).show();
                 }
                 if (drawBean == null) {
                     drawBean = JSON.parseObject(AssetsUtil.getFromAssets("default1.json", context), DrawBean.class);
@@ -421,7 +421,7 @@ final public class DateTimeDrawer {
             Matrix matrix = new Matrix();
             matrix.postTranslate((sWidth - outWidth) * 1f / 2, (sHeigth - outHeight) * 1f / 2);
 
-            float scale = 1f;
+            float scale;
             if (p1 < p2) {
                 scale = sHeigth * 1f / outHeight;
             } else {

@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     public void setTextColor(View view) {
         ColorPickerDialogBuilder
                 .with(this)
-                .setTitle("文字颜色")
+                .setTitle(R.string.text_color)
                 .initialColor((int) SharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.WHITE))
                 .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                 .density(13)
@@ -222,7 +222,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     public void setBackColor(View view) {
         ColorPickerDialogBuilder
                 .with(this)
-                .setTitle("背景颜色")
+                .setTitle(R.string.bg_color)
                 .initialColor((int) SharedPreferencesUtil.getData(SP_BG_COLOR, Color.BLACK))
                 .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
                 .density(13)
@@ -266,20 +266,20 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
 
     public void donateZFB(View view) {
         final MaterialDialog outDialog = new MaterialDialog(this);
-        outDialog.setTitle("谢谢支持");
-        outDialog.setMessage("软件完全免费，如果您觉得软件不错，可以打赏支持哦😜");
-        outDialog.setPositiveButton("我要打赏", new View.OnClickListener() {
+        outDialog.setTitle(R.string.thanks_for_support);
+        outDialog.setMessage(R.string.donate_tip);
+        outDialog.setPositiveButton(R.string.want_donate, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 boolean hasInstalledAlipayClient = AlipayDonate.hasInstalledAlipayClient(MainActivity.this);
                 if (hasInstalledAlipayClient) {
                     AlipayDonate.startAlipayClient(MainActivity.this, "apqiqql0hgh5pmv54d");
                 }
-                Toast.makeText(MainActivity.this, "谢谢支持", Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, R.string.thanks_for_support, Toast.LENGTH_SHORT).show();
             }
         });
 
-        outDialog.setNegativeButton("下次再说", new View.OnClickListener() {
+        outDialog.setNegativeButton(R.string.next_time, new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 outDialog.dismiss();
@@ -306,35 +306,35 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
             final MaterialDialog outDialog = new MaterialDialog(this);
-            outDialog.setTitle("请输入下载直链");
+            outDialog.setTitle(R.string.plz_enter_conf_url);
             final EditText editText = new EditText(this);
             outDialog.setContentView(editText);
             editText.setBackgroundColor(getResources().getColor(R.color.dracula_page_bg));
             editText.setFocusable(true);
-            editText.setHint("请输入下载链接");
+            editText.setHint(R.string.plz_enter_conf_url);
             outDialog.setCanceledOnTouchOutside(true);
-            outDialog.setPositiveButton("导入", new View.OnClickListener() {
+            outDialog.setPositiveButton(R.string.import_s, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     String url = editText.getText().toString();
                     if (TextUtils.isEmpty(url)) {
-                        Toast.makeText(MainActivity.this, "请求不能为空", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.url_null_tip, Toast.LENGTH_SHORT).show();
                         return;
                     } else if (url.lastIndexOf(".json") < 0) {
-                        Toast.makeText(MainActivity.this, "链接请以.json结尾", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, R.string.url_not_json, Toast.LENGTH_SHORT).show();
                         return;
                     }
                     String fileName = url.substring(url.lastIndexOf("/") + 1, url.length());
                     final File file = new File(FileUtil.getBaseFile(), fileName);
 
                     if (file.exists()) {
-                        Toast.makeText(MainActivity.this, "已存在" + file.getAbsolutePath(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, String.format(getString(R.string.exist_conf), file.getAbsolutePath()), Toast.LENGTH_SHORT).show();
                         return;
                     }
 
                     final MaterialDialog loadDialog = new MaterialDialog(MainActivity.this);
                     loadDialog.setContentView(new ProgressBar(MainActivity.this));
-                    loadDialog.setTitle("正在下载");
+                    loadDialog.setTitle(R.string.downloading);
                     loadDialog.show();
 
                     DownUtil.downLoadFile(url, file, new DownUtil.ReqCallBack() {
@@ -348,12 +348,12 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                         if (file.exists()) {
                                             SharedPreferencesUtil.putData(SP_CUS_CONF, file.getAbsolutePath());
                                             dateTimeView.resetConf(true);
-                                            Toast.makeText(MainActivity.this, "导入成功", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(MainActivity.this, R.string.import_success, Toast.LENGTH_SHORT).show();
                                         } else {
-                                            Toast.makeText(MainActivity.this, "导入失败", Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(MainActivity.this, R.string.import_fail, Toast.LENGTH_SHORT).show();
                                         }
                                     } else {
-                                        Toast.makeText(MainActivity.this, "导入失败", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(MainActivity.this, R.string.import_fail, Toast.LENGTH_SHORT).show();
                                     }
                                 }
                             });
@@ -362,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     outDialog.dismiss();
                 }
             });
-            outDialog.setNegativeButton("取消", new View.OnClickListener() {
+            outDialog.setNegativeButton(R.string.cancel, new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     outDialog.dismiss();
@@ -385,7 +385,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
         if (EasyPermissions.hasPermissions(this, perms)) {
             final MaterialDialog outDialog = new MaterialDialog(this);
-            outDialog.setTitle("选择配置");
+            outDialog.setTitle(R.string.select_conf);
             ListView listView = new ListView(this);
             final CusAdapter restoreAdapter = new CusAdapter();
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -394,20 +394,20 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     outDialog.dismiss();
                     final File file = (File) restoreAdapter.getItem(position);
                     final MaterialDialog innerDialog = new MaterialDialog(MainActivity.this);
-                    innerDialog.setTitle("确认选择配置");
+                    innerDialog.setTitle(R.string.select_conf_confirm);
                     if (file == null) {
-                        innerDialog.setMessage("选择配置:" + "恢复默认");
+                        innerDialog.setMessage(String.format(getString(R.string.select_conf_1), getString(R.string.select_conf_default)));
                     } else {
-                        innerDialog.setMessage("选择配置:" + file.getName());
+                        innerDialog.setMessage(String.format(getString(R.string.select_conf_1), file.getName()));
                     }
-                    innerDialog.setNegativeButton("否", new View.OnClickListener() {
+                    innerDialog.setNegativeButton(R.string.no, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             innerDialog.dismiss();
                         }
                     });
 
-                    innerDialog.setPositiveButton("是", new View.OnClickListener() {
+                    innerDialog.setPositiveButton(R.string.yes, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             if (file == null) {
@@ -438,9 +438,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_SET_WALLPAPER) {
             if (resultCode == RESULT_OK) {
-                Toast.makeText(this, "设置动态壁纸成功", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.set_wallpaper_success, Toast.LENGTH_SHORT).show();
             } else {
-                Toast.makeText(this, "取消设置动态壁纸", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, R.string.set_wallpaper_cancel, Toast.LENGTH_SHORT).show();
             }
         } else if (requestCode == REQUEST_CODE_CHOOSE && resultCode == RESULT_OK) {
             File org = new File(Matisse.obtainPathResult(data).get(0));
@@ -466,7 +466,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             } catch (Exception e) {
             }
         } else {
-            Toast.makeText(this, "您的系统版本过低，暂不支持本功能~", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.version_low, Toast.LENGTH_SHORT).show();
         }
     }
 

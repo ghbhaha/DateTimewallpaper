@@ -1,0 +1,45 @@
+<resources>
+    <string name="app_name">时间轮盘</string>
+    <string name="storage_permission">App requires storage permission to select pictures</string>
+    <string name="num_format">Uppercase number</string>
+    <string name="hide_from_recent">Hidden from recent tasks</string>
+    <string name="donate_zfb">Alipay reward</string>
+    <string name="vertical_pos">Vertical position</string>
+    <string name="horizontal_pos">Horizontal position</string>
+    <string name="scale">Scale</string>
+    <string name="rotate">Rotate</string>
+    <string name="text_color">Text color</string>
+    <string name="bg_color">Background color</string>
+    <string name="bg_img">Background picture</string>
+    <string name="set_wallpaper">Set wallpaper</string>
+    <string name="local_conf">Local configuration</string>
+    <string name="import_net_conf">ImportNetworkConfiguration</string>
+    <string name="about">About</string>
+    <string name="select_conf">Select Configuration</string>
+    <string name="select_conf_1">Select Configuration\'%s\'</string>
+    <string name="select_conf_confirm">Confirm selection configuration</string>
+    <string name="select_conf_default">Reset</string>
+    <string name="plz_enter_conf_url">Please enter the download url</string>
+    <string name="import_s">Import</string>
+    <string name="url_null_tip">Request cannot be empty</string>
+    <string name="url_not_json">Links please end with \'.json\'</string>
+    <string name="exist_conf">Existed%s</string>
+    <string name="downloading">Downloading</string>
+    <string name="import_success">Successfully imported</string>
+    <string name="import_fail">Import failed</string>
+    <string name="cancel">cancel</string>
+    <string name="thanks_for_support">Thanks for support</string>
+    <string name="next_time">Next time</string>
+    <string name="donate_tip">The software is completely free. If you think the software is good, you can reward it. 😜</string>
+    <string name="want_donate">I want to donate</string>
+    <string name="conf_error">There is a problem with your configuration</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+    <string name="set_wallpaper_success">success</string>
+    <string name="set_wallpaper_cancel">cancel</string>
+    <string name="version_low">Your system version is too low. This function is not supported at this time.</string>
+    <plurals name="error_over_count">
+        <item quantity="one">You can only select one media file</item>
+        <item quantity="many">You can only select up to %1$d media files</item>
+    </plurals>
+</resources>

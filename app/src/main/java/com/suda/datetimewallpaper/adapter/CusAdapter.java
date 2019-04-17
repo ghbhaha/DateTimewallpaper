@@ -60,7 +60,7 @@ final public class CusAdapter extends BaseAdapter {
         }
 
         if (position == 0) {
-            viewHolder.tvName.setText("恢复默认");
+                viewHolder.tvName.setText(R.string.select_conf_default);
         } else {
             viewHolder.tvName.setText(backFiles[position - 1].getName());
         }
