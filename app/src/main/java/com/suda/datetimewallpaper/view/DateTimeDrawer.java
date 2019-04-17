@@ -77,30 +77,26 @@ final public class DateTimeDrawer {
     private String bgImg = "";
     private Bitmap bgBitmap;
 
+    private String drawConfName = "";
+    private boolean changeConf = false;
+
     private int schedule = 16;
 
     private int monthIndex = 0;
     private int dayIndex = 0;
     private int weekIndex = 0;
-
     float secondDelta = 0f;
     int secondIndex = 0;
-
-
     private int amOrPm = 0;
     private int hourIndex = 0;
     private int minusIndex = 0;
-    private boolean userHardCanvas = true;
-
-    private AtomicBoolean start = new AtomicBoolean(true);
-
-    DrawBean drawBean;
-
     private Date current;
 
-    Typeface cusTypeFace;
+    private boolean userHardCanvas = true;
+    private AtomicBoolean start = new AtomicBoolean(true);
+    private DrawBean drawBean;
 
-    boolean changeConf = false;
+    private Typeface cusTypeFace;
 
     private TimerTask refreshTask = new TimerTask() {
         @Override
@@ -110,15 +106,10 @@ final public class DateTimeDrawer {
             dayIndex = mCurCalendar.get(Calendar.DATE) - 1;
             weekIndex = mCurCalendar.get(Calendar.DAY_OF_WEEK) - 1;
             hourIndex = (mCurCalendar.get(Calendar.HOUR_OF_DAY) - 1);
-
-            current = mCurCalendar.getTime();
-
             amOrPm = mCurCalendar.get(Calendar.AM_PM);
-
-
             minusIndex = mCurCalendar.get(Calendar.MINUTE) - 1;
             secondIndex = mCurCalendar.get(Calendar.SECOND) - 1;
-
+            current = mCurCalendar.getTime();
 
             if (hourIndex == -1) {
                 hourIndex = 23;
@@ -132,7 +123,6 @@ final public class DateTimeDrawer {
                 secondIndex = 59;
             }
 
-
             //处理动画
             float sd = (System.currentTimeMillis() % 1000) * 1.0f / (schedule * 25);
 
@@ -140,49 +130,40 @@ final public class DateTimeDrawer {
             if (secondDelta == 0 && sd > 1 && !changeConf) {
                 return;
             }
-
             changeConf = false;
-
             secondDelta = sd;
-            if (sd > 1f) {
+            if (sd >= 1f) {
                 secondDelta = 1f;
             }
             secondDelta = secondDelta - 1;
-
             if (start.get()) {
-                try {
-                    onDraw();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
+                onDraw();
             }
         }
     };
 
     private void onDraw() {
-        Canvas canvas;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && userHardCanvas) {
-            canvas = surfaceHolder.lockCanvas();
-        } else {
-            canvas = surfaceHolder.lockCanvas();
-        }
-
+        Canvas canvas = null;
         try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && userHardCanvas) {
+
+                // miui 清理最近任务时会报错，蛋疼
+                // canvas = surfaceHolder.lockHardwareCanvas();
+
+                canvas = surfaceHolder.lockCanvas();
+            } else {
+                canvas = surfaceHolder.lockCanvas();
+            }
             if (canvas == null) {
                 return;
             }
-
             if (bgBitmap != null) {
                 canvas.drawBitmap(bgBitmap, bgMatrix, bgPaint);
             } else {
                 canvas.drawColor(bgColor);
             }
-
             drawCenter(canvas);
-            for (int i = 0; i < drawBean.getCircleText().size(); i++) {
-                drawText(canvas, drawBean.getCircleText().get(i).getDis(), drawBean.getCircleText().get(i));
-            }
+            drawCircle(canvas);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -195,34 +176,28 @@ final public class DateTimeDrawer {
     private void drawCenter(Canvas canvas) {
         centerPaint.setTextSize(drawBean.getCenterTextSize() * 1.0f / drawBean.getCenterText().size());
         centerPaint.setColor(textColor);
-
         Paint.FontMetrics fontMetrics = centerPaint.getFontMetrics();
-
         float dis = (fontMetrics.top - fontMetrics.bottom) * 2;
-
-        int index = 0;
+        int i = 0;
         for (TextBean textBean : drawBean.getCenterText()) {
+            if (textBean.getArray().isEmpty()) {
+                continue;
+            }
             String centerText = "";
-            if ("week".equals(textBean.getType())) {
-                centerText = textBean.getArray().get(weekIndex >= textBean.getArray().size() ? 0 : weekIndex);
-            } else if ("ampm".equals(textBean.getType())) {
-                if (textBean.getArray().size() == 2) {
-                    centerText = textBean.getArray().get(amOrPm);
-                }
-            } else if ("dateformat".equals(textBean.getType())) {
-                try {
+            try {
+                if ("dateformat".equals(textBean.getType())) {
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(textBean.getArray().get(0));
                     centerText = simpleDateFormat.format(current);
-                } catch (Exception e) {
+                } else {
+                    Index index = getIndex(textBean);
+                    if (index.index < textBean.getArray().size()) {
+                        centerText = textBean.getArray().get(index.index);
+                    }
                 }
-            } else {
-                if (textBean.getArray().size() > 0) {
-                    centerText = textBean.getArray().get(0);
-                }
+            } catch (Exception e) {
+                continue;
             }
-
             centerPaint.setTypeface(textBean.getUseCusFont() == 1 ? cusTypeFace : null);
-
             float strLength = centerPaint.measureText(centerText);
             matrix.reset();
             float scale = 0.52f * (canvas.getWidth() / 1080f);
@@ -231,21 +206,58 @@ final public class DateTimeDrawer {
             matrix.postRotate(rotate * 360, canvas.getWidth() * horizontalPos, canvas.getHeight() * verticalPos);
             matrix.postScale(scale * this.scale, scale * this.scale, canvas.getWidth() * horizontalPos, canvas.getHeight() * verticalPos);
             canvas.setMatrix(matrix);
-            float h = index * dis - (dis / 2) * (drawBean.getCenterText().size() - 1);
+            float h = i * dis - (dis / 2) * (drawBean.getCenterText().size() - 1);
             float baseline = (h - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent;
             centerPaint.setFakeBoldText(textBean.getBold() == 1);
             canvas.drawText(centerText, 0, baseline, centerPaint);
-            index++;
+            i++;
         }
 
     }
 
     /**
      * @param canvas
-     * @param radius
-     * @param textBean
      */
-    private void drawText(Canvas canvas, float radius, TextBean textBean) {
+    private void drawCircle(Canvas canvas) {
+        for (TextBean textBean : drawBean.getCircleText()) {
+            float radius = textBean.getDis();
+            Index index = getIndex(textBean);
+            clockPaint.setFakeBoldText(textBean.getBold() == 1);
+            clockPaint.setTextSize(drawBean.getCircleTextSize());
+            float scale = 0.52f * (canvas.getWidth() / 1080f);
+            int width = canvas.getWidth();
+            int height = canvas.getHeight();
+            float addD = 360f / textBean.getArray().size();
+            float degree = 0f - addD * index.index - addD * index.delta;
+            int i = 0;
+            Paint.FontMetrics fontMetrics = clockPaint.getFontMetrics();
+            float baseline = (0 - (fontMetrics.descent -
+                    fontMetrics.ascent)) / 2 - fontMetrics.ascent;
+            for (String str : textBean.getArray()) {
+                matrix.reset();
+                matrix.postTranslate(width * horizontalPos, height * verticalPos);
+                matrix.postTranslate(radius, 0);
+                matrix.postRotate(degree + rotate * 360, width * horizontalPos, height * verticalPos);
+                matrix.postScale(scale * this.scale, scale * this.scale, width * horizontalPos, height * verticalPos);
+                canvas.setMatrix(matrix);
+                if ("text".equals(textBean.getType())) {
+                    clockPaint.setColor(textColor);
+                } else {
+                    if (index.delta == -1f || index.delta == 0f) {
+                        clockPaint.setColor(i == index.index ? textColor : darkenTextColor);
+                    } else {
+                        clockPaint.setColor(darkenTextColor);
+                    }
+                }
+                clockPaint.setTypeface(textBean.getUseCusFont() == 1 ? cusTypeFace : null);
+                canvas.drawText(str, 0, baseline, clockPaint);
+                degree += addD;
+                i++;
+            }
+        }
+    }
+
+    private Index getIndex(TextBean textBean) {
         int curIndex = 0;
         float delta = 0;
         if ("month".equals(textBean.getType())) {
@@ -277,41 +289,16 @@ final public class DateTimeDrawer {
         } else {
             curIndex = 0;
         }
+        return new Index(curIndex, delta);
+    }
 
-        clockPaint.setFakeBoldText(textBean.getBold() == 1);
-        clockPaint.setTextSize(drawBean.getCircleTextSize());
-        float scale = 0.52f * (canvas.getWidth() / 1080f);
-        int width = canvas.getWidth();
-        int height = canvas.getHeight();
-        float addD = 360f / textBean.getArray().size();
-        float degree = 0f - addD * curIndex - addD * delta;
-        int index = 0;
-        Paint.FontMetrics fontMetrics = clockPaint.getFontMetrics();
-        float baseline = (0 - (fontMetrics.descent -
-                fontMetrics.ascent)) / 2 - fontMetrics.ascent;
+    class Index {
+        int index;
+        float delta;
 
-        for (String str : textBean.getArray()) {
-            matrix.reset();
-            matrix.postTranslate(width * horizontalPos, height * verticalPos);
-            matrix.postTranslate(radius, 0);
-            matrix.postRotate(degree + rotate * 360, width * horizontalPos, height * verticalPos);
-            matrix.postScale(scale * this.scale, scale * this.scale, width * horizontalPos, height * verticalPos);
-            canvas.setMatrix(matrix);
-
-            if ("text".equals(textBean.getType())) {
-                clockPaint.setColor(textColor);
-            } else {
-                if (delta == -1f || delta == 0f) {
-                    clockPaint.setColor(index == curIndex ? textColor : darkenTextColor);
-                } else {
-                    clockPaint.setColor(darkenTextColor);
-                }
-            }
-
-            clockPaint.setTypeface(textBean.getUseCusFont() == 1 ? cusTypeFace : null);
-            canvas.drawText(str, 0, baseline, clockPaint);
-            degree += addD;
-            index++;
+        public Index(int index, float delta) {
+            this.index = index;
+            this.delta = delta;
         }
     }
 
@@ -343,23 +330,21 @@ final public class DateTimeDrawer {
         textColor = (int) SharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.WHITE);
         darkenTextColor = darkenColor(textColor);
         if (force) {
-            drawStr = "";
+            drawConfName = "";
         }
-        changeConf = true;
-        setCircleTextFormat();
+        resetJsonConf();
         setBg();
+        changeConf = true;
         start.set(true);
     }
 
-    private String drawStr = "";
-
-    private void setCircleTextFormat() {
+    private void resetJsonConf() {
         String cus = (String) SharedPreferencesUtil.getData(SP_CUS_CONF, "");
         if (!TextUtils.isEmpty(cus)) {
-            if (!cus.equals(drawStr)) {
-                drawStr = cus;
+            if (!cus.equals(drawConfName)) {
+                drawConfName = cus;
                 try {
-                    drawBean = JSON.parseObject(FileUtil.getFromFile(new File(drawStr)), DrawBean.class);
+                    drawBean = JSON.parseObject(FileUtil.getFromFile(new File(drawConfName)), DrawBean.class);
                 } catch (Exception e) {
                     Toast.makeText(context, "您的配置有问题", Toast.LENGTH_SHORT).show();
                 }
@@ -375,9 +360,9 @@ final public class DateTimeDrawer {
             } else {
                 cus = "default2.json";
             }
-            if (!cus.equals(drawStr)) {
+            if (!cus.equals(drawConfName)) {
                 drawBean = JSON.parseObject(AssetsUtil.getFromAssets(cus, context), DrawBean.class);
-                drawStr = cus;
+                drawConfName = cus;
             }
             setCircleTextAndCalDis();
         }

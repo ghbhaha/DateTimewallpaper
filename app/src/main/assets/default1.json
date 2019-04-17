@@ -5,7 +5,7 @@
   "centerText": [
     {
       "type": "week",
-      "bold": 1,
+      "bold": 0,
       "useCusFont": 1,
       "array": [
         "周日",
