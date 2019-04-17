@@ -198,12 +198,8 @@ final public class DateTimeDrawer {
 
         Paint.FontMetrics fontMetrics = centerPaint.getFontMetrics();
 
+        float dis = (fontMetrics.top - fontMetrics.bottom) * 2;
 
-        float dis = (fontMetrics.top -
-                fontMetrics.bottom);
-        if (drawBean.getCenterText().size() == 1) {
-            dis = 0;
-        }
         int index = 0;
         for (TextBean textBean : drawBean.getCenterText()) {
             String centerText = "";
@@ -235,9 +231,8 @@ final public class DateTimeDrawer {
             matrix.postRotate(rotate * 360, canvas.getWidth() * horizontalPos, canvas.getHeight() * verticalPos);
             matrix.postScale(scale * this.scale, scale * this.scale, canvas.getWidth() * horizontalPos, canvas.getHeight() * verticalPos);
             canvas.setMatrix(matrix);
-            float h = -(2 * index - 1) * dis;
-            float baseline = (h - (fontMetrics.descent -
-                    fontMetrics.ascent)) / 2 - fontMetrics.ascent;
+            float h = index * dis - (dis / 2) * (drawBean.getCenterText().size() - 1);
+            float baseline = (h - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent;
             centerPaint.setFakeBoldText(textBean.getBold() == 1);
             canvas.drawText(centerText, 0, baseline, centerPaint);
             index++;
@@ -259,6 +254,15 @@ final public class DateTimeDrawer {
             curIndex = dayIndex;
         } else if ("hour".equals(textBean.getType())) {
             curIndex = hourIndex % textBean.getArray().size();
+        } else if ("hour_23_23".equals(textBean.getType())) {
+            hourIndex = hourIndex + 1;
+            if (hourIndex == 23) {
+                curIndex = 0;
+            } else if (hourIndex % 2 == 1) {
+                curIndex = (hourIndex + 1) / 2;
+            } else {
+                curIndex = hourIndex / 2;
+            }
         } else if ("minute".equals(textBean.getType())) {
             curIndex = minusIndex;
             //secondIndex==-1表示到达下一分钟，处理分钟动画
