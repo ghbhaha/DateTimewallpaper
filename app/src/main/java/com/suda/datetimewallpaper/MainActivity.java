@@ -10,7 +10,9 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.TextUtils;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
@@ -386,7 +388,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         if (EasyPermissions.hasPermissions(this, perms)) {
             final MaterialDialog outDialog = new MaterialDialog(this);
             outDialog.setTitle(R.string.select_conf);
-            ListView listView = new ListView(this);
+            ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.cus_conf_layout, null);
+            ListView listView = viewGroup.findViewById(R.id.conf_list);
             final CusAdapter restoreAdapter = new CusAdapter();
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
@@ -424,7 +427,7 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                 }
             });
             listView.setAdapter(restoreAdapter);
-            outDialog.setContentView(listView);
+            outDialog.setContentView(viewGroup);
             outDialog.setCanceledOnTouchOutside(true);
             outDialog.show();
         } else {
