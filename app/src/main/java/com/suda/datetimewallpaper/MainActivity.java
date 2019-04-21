@@ -33,6 +33,7 @@ import com.suda.datetimewallpaper.util.DownUtil;
 import com.suda.datetimewallpaper.util.FileUtil;
 import com.suda.datetimewallpaper.util.Glide4Engine;
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil;
+import com.suda.datetimewallpaper.util.TextUtil;
 import com.suda.datetimewallpaper.util.WallpaperUtil;
 import com.suda.datetimewallpaper.view.DateTimeView;
 import com.umeng.analytics.MobclickAgent;
@@ -306,6 +307,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     } else if (url.lastIndexOf(".json") < 0) {
                         Toast.makeText(MainActivity.this, R.string.url_not_json, Toast.LENGTH_SHORT).show();
                         return;
+                    } else if (!TextUtil.isJsonUrl(url)) {
+                        Toast.makeText(MainActivity.this, R.string.url_not_correct, Toast.LENGTH_SHORT).show();
+                        return;
                     }
                     String fileName = url.substring(url.lastIndexOf("/") + 1, url.length());
                     final File file = new File(FileUtil.getBaseFile(), fileName);
@@ -319,32 +323,35 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     loadDialog.setContentView(new ProgressBar(MainActivity.this));
                     loadDialog.setTitle(R.string.downloading);
                     loadDialog.show();
+                    try {
+                        DownUtil.downLoadFile(url, file, new DownUtil.ReqCallBack() {
+                            @Override
+                            public void showResult(final int code) {
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        loadDialog.dismiss();
+                                        if (code == 1) {
+                                            if (file.exists()) {
+                                                SharedPreferencesUtil.putData(SP_CUS_CONF, file.getAbsolutePath());
+                                                dateTimeView.resetConf(true);
 
-                    DownUtil.downLoadFile(url, file, new DownUtil.ReqCallBack() {
-                        @Override
-                        public void showResult(final int code) {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    loadDialog.dismiss();
-                                    if (code == 1) {
-                                        if (file.exists()) {
-                                            SharedPreferencesUtil.putData(SP_CUS_CONF, file.getAbsolutePath());
-                                            dateTimeView.resetConf(true);
+                                                AlipayDonate.donateTip("usecus", 2, MainActivity.this);
 
-                                            AlipayDonate.donateTip("usecus", 2, MainActivity.this);
-
-                                            Toast.makeText(MainActivity.this, R.string.import_success, Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(MainActivity.this, R.string.import_success, Toast.LENGTH_SHORT).show();
+                                            } else {
+                                                Toast.makeText(MainActivity.this, R.string.import_fail, Toast.LENGTH_SHORT).show();
+                                            }
                                         } else {
                                             Toast.makeText(MainActivity.this, R.string.import_fail, Toast.LENGTH_SHORT).show();
                                         }
-                                    } else {
-                                        Toast.makeText(MainActivity.this, R.string.import_fail, Toast.LENGTH_SHORT).show();
                                     }
-                                }
-                            });
-                        }
-                    });
+                                });
+                            }
+                        });
+                    } catch (Exception e) {
+                        Toast.makeText(MainActivity.this, R.string.import_fail, Toast.LENGTH_SHORT).show();
+                    }
                     outDialog.dismiss();
                 }
             });

@@ -23,6 +23,7 @@
     <string name="import_s">导入</string>
     <string name="url_null_tip">请求不能为空</string>
     <string name="url_not_json">链接请以.json结尾</string>
+    <string name="url_not_correct">这不是一个有效的链接</string>
     <string name="exist_conf">已存在%s</string>
     <string name="downloading">正在下载</string>
     <string name="import_success">导入成功</string>
