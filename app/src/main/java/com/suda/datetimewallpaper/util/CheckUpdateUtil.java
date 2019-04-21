@@ -64,7 +64,7 @@ public class CheckUpdateUtil {
                             String verName = jsonObject.getString("verName");
                             String info = jsonObject.getString("info");
                             final String downUrl = jsonObject.getString("downUrl");
-                            if (BuildConfig.VERSION_CODE <= verCode) {
+                            if (BuildConfig.VERSION_CODE < verCode) {
                                 final MaterialDialog innerDialog = new MaterialDialog(activity);
                                 innerDialog.setTitle("更新日志" + verName);
                                 innerDialog.setMessage(info);
