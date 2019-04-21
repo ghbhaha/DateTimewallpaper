@@ -7,8 +7,8 @@ android {
         applicationId "com.suda.datetimewallpaper"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 16
-        versionName "2.03"
+        versionCode 18
+        versionName "2.05"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
     Properties props = new Properties()
