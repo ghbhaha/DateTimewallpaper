@@ -24,12 +24,17 @@ final public class CusAdapter extends BaseAdapter {
     private File[] backFiles = null;
 
     public CusAdapter() {
+        refresh();
+    }
+
+    public void refresh() {
         backFiles = FileUtil.getBaseFile().listFiles(new FileFilter() {
             @Override
             public boolean accept(File pathname) {
                 return pathname.getName().contains(".json") || pathname.getName().contains(".txt");
             }
         });
+        notifyDataSetChanged();
     }
 
     @Override

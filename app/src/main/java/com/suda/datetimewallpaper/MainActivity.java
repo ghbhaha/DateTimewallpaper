@@ -107,6 +107,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         showHideNumFormat();
 
         setExcludeFromRecents(cbHideAct.isChecked());
+
+        AlipayDonate.donateTip("gomain", 5, this);
     }
 
     @Override
@@ -158,7 +160,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     public void onStopTrackingTouch(SeekBar seekBar) {
 
     }
-
 
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
@@ -267,29 +268,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
     }
 
     public void donateZFB(View view) {
-        final MaterialDialog outDialog = new MaterialDialog(this);
-        outDialog.setTitle(R.string.thanks_for_support);
-        outDialog.setMessage(R.string.donate_tip);
-        outDialog.setPositiveButton(R.string.want_donate, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                boolean hasInstalledAlipayClient = AlipayDonate.hasInstalledAlipayClient(MainActivity.this);
-                if (hasInstalledAlipayClient) {
-                    AlipayDonate.startAlipayClient(MainActivity.this, "apqiqql0hgh5pmv54d");
-                }
-                Toast.makeText(MainActivity.this, R.string.thanks_for_support, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        outDialog.setNegativeButton(R.string.next_time, new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                outDialog.dismiss();
-            }
-        });
-        outDialog.show();
+        Toast.makeText(this, "感谢支持,时间轮盘将越来越好", Toast.LENGTH_SHORT).show();
+        AlipayDonate.startAlipayClient(MainActivity.this, "apqiqql0hgh5pmv54d");
     }
-
 
     private void showHideNumFormat() {
         if ("".equals(SharedPreferencesUtil.getData(SP_CUS_CONF, ""))) {
@@ -350,6 +331,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                                         if (file.exists()) {
                                             SharedPreferencesUtil.putData(SP_CUS_CONF, file.getAbsolutePath());
                                             dateTimeView.resetConf(true);
+
+                                            AlipayDonate.donateTip("usecus", 2, MainActivity.this);
+
                                             Toast.makeText(MainActivity.this, R.string.import_success, Toast.LENGTH_SHORT).show();
                                         } else {
                                             Toast.makeText(MainActivity.this, R.string.import_fail, Toast.LENGTH_SHORT).show();
@@ -381,7 +365,6 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         setCusConf();
     }
 
-
     @AfterPermissionGranted(REQUEST_CODE_PERMISSION2)
     private void setCusConf() {
         String[] perms = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
@@ -391,6 +374,33 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
             ViewGroup viewGroup = (ViewGroup) LayoutInflater.from(this).inflate(R.layout.cus_conf_layout, null);
             ListView listView = viewGroup.findViewById(R.id.conf_list);
             final CusAdapter restoreAdapter = new CusAdapter();
+            listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                    final File file = (File) restoreAdapter.getItem(position);
+                    final MaterialDialog outDialog = new MaterialDialog(MainActivity.this);
+                    outDialog.setTitle(R.string.select_conf);
+                    outDialog.setMessage(String.format(getString(R.string.delete_conf), file.getName()));
+                    outDialog.setCanceledOnTouchOutside(true);
+                    outDialog.setNegativeButton(R.string.cancel, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            outDialog.dismiss();
+                        }
+                    });
+
+                    outDialog.setPositiveButton(R.string.yes, new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            file.delete();
+                            restoreAdapter.refresh();
+                            outDialog.dismiss();
+                        }
+                    });
+                    outDialog.show();
+                    return true;
+                }
+            });
             listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -413,6 +423,9 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
                     innerDialog.setPositiveButton(R.string.yes, new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+
+                            AlipayDonate.donateTip("usecus", 2, MainActivity.this);
+
                             if (file == null) {
                                 SharedPreferencesUtil.putData(SP_CUS_CONF, "");
                             } else {

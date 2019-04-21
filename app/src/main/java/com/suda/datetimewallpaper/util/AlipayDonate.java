@@ -2,6 +2,8 @@ package com.suda.datetimewallpaper.util;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
@@ -9,8 +11,14 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.service.quicksettings.TileService;
+import android.view.View;
+import android.widget.Toast;
+
+import com.suda.datetimewallpaper.R;
 
 import java.net.URISyntaxException;
+
+import me.drakeet.materialdialog.MaterialDialog;
 
 /**
  * Created by didikee on 2017/7/21.
@@ -18,6 +26,51 @@ import java.net.URISyntaxException;
  */
 
 public class AlipayDonate {
+
+    public static void donateTip(String key, int maxClick, final Context context) {
+
+        String key1 = "DONATE:" + key;
+        final String key2 = "lastClickTime:" + key;
+
+        int clickTime = (int) SharedPreferencesUtil.getData(key1, 0);
+        SharedPreferencesUtil.putData(key1, clickTime + 1);
+
+        long lastDonateTime = (long) SharedPreferencesUtil.getData(key2, 0L);
+
+        //每两天会弹
+        if (clickTime > 0 && clickTime % maxClick == 0 && System.currentTimeMillis() - lastDonateTime > 2 * 24 * 3600 * 1000) {
+            SharedPreferencesUtil.putData(key2, System.currentTimeMillis());
+            final MaterialDialog outDialog = new MaterialDialog(context);
+            outDialog.setTitle(R.string.thanks_for_support);
+            outDialog.setMessage(R.string.donate_tip);
+            outDialog.setCanceledOnTouchOutside(true);
+            outDialog.setPositiveButton(R.string.want_donate, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    boolean hasInstalledAlipayClient = AlipayDonate.hasInstalledAlipayClient(context);
+                    if (hasInstalledAlipayClient) {
+                        Toast.makeText(context, "感谢支持,时间轮盘将越来越好", Toast.LENGTH_SHORT).show();
+                        AlipayDonate.startAlipayClient((Activity) context, "apqiqql0hgh5pmv54d");
+                    }
+                    Toast.makeText(context, R.string.thanks_for_support, Toast.LENGTH_SHORT).show();
+                }
+            });
+
+            outDialog.setNegativeButton(R.string.copy_code, new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    ClipboardManager cm = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                    ClipData mClipData = ClipData.newPlainText("红包码", "521043031");
+                    cm.setPrimaryClip(mClipData);
+                    Toast.makeText(context, "复制成功，快去支付宝领取吧", Toast.LENGTH_SHORT).show();
+                    outDialog.dismiss();
+                }
+            });
+            outDialog.show();
+        }
+    }
+
+
     // 支付宝包名
     private static final String ALIPAY_PACKAGE_NAME = "com.eg.android.AlipayGphone";
 

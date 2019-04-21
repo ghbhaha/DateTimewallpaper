@@ -30,7 +30,8 @@
     <string name="cancel">取消</string>
     <string name="thanks_for_support">谢谢支持</string>
     <string name="next_time">下次再说</string>
-    <string name="donate_tip">软件完全免费，如果您觉得软件不错，可以打赏支持哦😜</string>
+    <string name="copy_code">领红包</string>
+    <string name="donate_tip">软件完全免费，如果您觉得软件不错，可以打赏支持，或者打开支付宝首页搜“521043031”领红包哦</string>
     <string name="want_donate">我要打赏</string>
     <string name="conf_error">您的配置有问题</string>
     <string name="yes">是</string>
