@@ -13,6 +13,7 @@ public class TextBean {
     private int bold = 0;
     private float dis;
     private String type;
+    private int clockwise = 0;
     private List<String> array = new ArrayList<>();
 
     public String getType() {
@@ -53,5 +54,13 @@ public class TextBean {
 
     public void setUseCusFont(int useCusFont) {
         this.useCusFont = useCusFont;
+    }
+
+    public int getClockwise() {
+        return clockwise;
+    }
+
+    public void setClockwise(int clockwise) {
+        this.clockwise = clockwise;
     }
 }
