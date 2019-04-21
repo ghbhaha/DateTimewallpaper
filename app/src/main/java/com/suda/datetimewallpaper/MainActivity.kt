@@ -15,8 +15,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.flask.colorpicker.ColorPickerView
-import com.flask.colorpicker.builder.ColorPickerDialogBuilder
+import com.jaredrummler.android.colorpicker.ColorPickerDialog
+import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
 import com.suda.datetimewallpaper.about.AboutActivity
 import com.suda.datetimewallpaper.adapter.CusAdapter
 import com.suda.datetimewallpaper.util.*
@@ -43,12 +43,27 @@ const val REQUEST_CODE_PERMISSION = 0x003
 const val REQUEST_CODE_PERMISSION2 = 0x004
 const val REQUEST_CODE_PERMISSION3 = 0x005
 
-class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
+class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, ColorPickerDialogListener {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        dtv.setOnClickListener {
+            panel.visibility = if (panel.visibility == View.VISIBLE) {
+                View.GONE
+            } else {
+                View.VISIBLE
+            }
+            bt_set_wallpaper.visibility = if (bt_set_wallpaper.visibility == View.VISIBLE) {
+                View.GONE
+            } else {
+                View.VISIBLE
+            }
+        }
+
+        panel.setOnTouchListener { _, _ -> true }
 
         setProgress(R.id.vertical_margin, SP_VERTICAL_POS, 0.5f)
         setProgress(R.id.horizontal_margin, SP_VERTICAL_POS, 0.5f)
@@ -119,21 +134,17 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     fun setTextColor(view: View) {
-        ColorPickerDialogBuilder
-            .with(this)
-            .setTitle(R.string.text_color)
-            .initialColor(SharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.WHITE) as Int)
-            .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
-            .density(13)
-            .lightnessSliderOnly()
-            .setOnColorSelectedListener { }
-            .setPositiveButton("ok") { _, selectedColor, allColors ->
-                SharedPreferencesUtil.putData(SP_TEXT_COLOR, selectedColor)
-                dtv.resetConf(false)
-            }
-            .setNegativeButton("cancel") { _, _ -> }
-            .build()
-            .show()
+        ColorPickerDialog.newBuilder()
+            .setDialogId(1)
+            .setColor(SharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.BLACK) as Int)
+            .show(this)
+    }
+
+    fun setTextColorDark(view: View) {
+        ColorPickerDialog.newBuilder()
+            .setDialogId(2)
+            .setColor(SharedPreferencesUtil.getData(SP_TEXT_COLOR_DARK, Color.BLACK.dark()) as Int)
+            .show(this)
     }
 
     fun setBackImage(view: View) {
@@ -166,22 +177,26 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
     }
 
     fun setBackColor(view: View) {
-        ColorPickerDialogBuilder
-            .with(this)
-            .setTitle(R.string.bg_color)
-            .initialColor(SharedPreferencesUtil.getData(SP_BG_COLOR, Color.BLACK) as Int)
-            .wheelType(ColorPickerView.WHEEL_TYPE.FLOWER)
-            .density(13)
-            .lightnessSliderOnly()
-            .setOnColorSelectedListener { }
-            .setPositiveButton("ok") { _, selectedColor, _ ->
-                SharedPreferencesUtil.putData(SP_BG_COLOR, selectedColor)
-                SharedPreferencesUtil.putData(SP_BG_IMAGE, "")
-                dtv.resetConf(false)
-            }
-            .setNegativeButton("cancel") { _, _ -> }
-            .build()
-            .show()
+        ColorPickerDialog.newBuilder()
+            .setDialogId(3)
+            .setColor(SharedPreferencesUtil.getData(SP_BG_COLOR, Color.BLACK) as Int)
+            .show(this)
+    }
+
+    override fun onColorSelected(p0: Int, p1: Int) {
+        if (p0 == 1) {
+            SharedPreferencesUtil.putData(SP_TEXT_COLOR, p1)
+        } else if (p0 == 2) {
+            SharedPreferencesUtil.putData(SP_TEXT_COLOR_DARK, p1)
+        } else if (p0 == 3) {
+            SharedPreferencesUtil.putData(SP_BG_COLOR, p1)
+            SharedPreferencesUtil.putData(SP_BG_IMAGE, "")
+        }
+        dtv.resetConf(false)
+    }
+
+    override fun onDialogDismissed(p0: Int) {
+
     }
 
     fun setWallPaper(view: View) {
@@ -406,5 +421,4 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
-
 }

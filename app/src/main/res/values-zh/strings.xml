@@ -3,12 +3,13 @@
     <string name="storage_permission">时间轮盘需要存储权限选择图片</string>
     <string name="num_format">大写数字</string>
     <string name="hide_from_recent">最近任务隐藏</string>
-    <string name="donate_zfb">支付宝打赏</string>
+    <string name="donate_zfb">打赏</string>
     <string name="vertical_pos">垂直位置</string>
     <string name="horizontal_pos">水平位置</string>
     <string name="scale">缩放大小</string>
     <string name="rotate">旋转角度</string>
-    <string name="text_color">文字颜色</string>
+    <string name="text_color_dark">文字颜色(深)</string>
+    <string name="text_color_light">文字颜色(亮)</string>
     <string name="bg_color">背景颜色</string>
     <string name="bg_img">背景图片</string>
     <string name="set_wallpaper">设置壁纸</string>

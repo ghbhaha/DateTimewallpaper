@@ -8,7 +8,8 @@
     <string name="horizontal_pos">Horizontal position</string>
     <string name="scale">Scale</string>
     <string name="rotate">Rotate</string>
-    <string name="text_color">Text color</string>
+    <string name="text_color_dark">Text color(Dark)</string>
+    <string name="text_color_light">Text color(Light)</string>
     <string name="bg_color">Background color</string>
     <string name="bg_img">Background picture</string>
     <string name="set_wallpaper">Set wallpaper</string>

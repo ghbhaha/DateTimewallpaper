@@ -31,7 +31,6 @@ import java.util.concurrent.atomic.AtomicBoolean
  */
 class DateTimeDrawer {
 
-
     private var circleBaseline = 0f
 
     private var context: Context? = null
@@ -277,44 +276,56 @@ class DateTimeDrawer {
     }
 
     private fun getIndex(textBean: TextBean): Index {
-        var curIndex = 0
+        var curIndex: Int
         var delta = 0f
-        if ("month" == textBean.type) {
-            curIndex = monthIndex
-        } else if ("day" == textBean.type) {
-            curIndex = dayIndex
-        } else if ("lunarAnimal" == textBean.type) {
-            curIndex = lunarCalendar!!.animalsYearInt()
-        } else if ("lunarMonth" == textBean.type) {
-            curIndex = lunarCalendar!!.month - 1
-        } else if ("lunarDay" == textBean.type) {
-            curIndex = lunarCalendar!!.day - 1
-        } else if ("hour" == textBean.type) {
-            curIndex = hourIndex % textBean.array.size
-        } else if ("hour_23_23" == textBean.type) {
-            hourIndex = hourIndex + 1
-            if (hourIndex == 23) {
-                curIndex = 0
-            } else if (hourIndex % 2 == 1) {
-                curIndex = (hourIndex + 1) / 2
-            } else {
-                curIndex = hourIndex / 2
+        when (textBean.type) {
+            "month" -> {
+                curIndex = monthIndex
             }
-        } else if ("minute" == textBean.type) {
-            curIndex = minusIndex
-            //secondIndex==-1表示到达下一分钟，处理分钟动画
-            delta = if (secondIndex == 59) secondDelta else 0f
-        } else if ("second" == textBean.type) {
-            delta = secondDelta
-            curIndex = secondIndex
-        } else if ("week" == textBean.type) {
-            curIndex = weekIndex
-        } else if ("ampm" == textBean.type) {
-            curIndex = amOrPm
-        } else {
-            curIndex = 0
+            "day" -> {
+                curIndex = dayIndex
+            }
+            "lunarAnimal" -> {
+                curIndex = lunarCalendar!!.animalsYearInt()
+            }
+            "lunarMonth" -> {
+                curIndex = lunarCalendar!!.month - 1
+            }
+            "lunarDay" -> {
+                curIndex = lunarCalendar!!.day - 1
+            }
+            "hour" -> {
+                curIndex = hourIndex % textBean.array.size
+            }
+            "hour_23_23" -> {
+                hourIndex = hourIndex + 1
+                if (hourIndex == 23) {
+                    curIndex = 0
+                } else if (hourIndex % 2 == 1) {
+                    curIndex = (hourIndex + 1) / 2
+                } else {
+                    curIndex = hourIndex / 2
+                }
+            }
+            "minute" -> {
+                curIndex = minusIndex
+                //secondIndex==-1表示到达下一分钟，处理分钟动画
+                delta = if (secondIndex == 59) secondDelta else 0f
+            }
+            "second" -> {
+                delta = secondDelta
+                curIndex = secondIndex
+            }
+            "week" -> {
+                curIndex = weekIndex
+            }
+            "ampm" -> {
+                curIndex = amOrPm
+            }
+            else -> {
+                curIndex = 0
+            }
         }
-
         return Index(curIndex, delta)
     }
 
@@ -329,7 +340,6 @@ class DateTimeDrawer {
      */
     fun init(holder: SurfaceHolder, context: Context, userHardCanvas: Boolean) {
         this.useHardCanvas = userHardCanvas
-        //        this.useHardCanvas = true;
         this.canUseHardCanvas = !OSHelper.isMIUI()
         clockPaint.isAntiAlias = true
         clockPaint.isDither = true
@@ -353,7 +363,7 @@ class DateTimeDrawer {
         scale = (2 * SharedPreferencesUtil.getData(SP_SCALE, 0.25f) as Float + 0.5f) * 0.52f * (dm.widthPixels / 1080f)
 
         textColor = SharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.WHITE) as Int
-        darkenTextColor = darkenColor(textColor)
+        darkenTextColor = SharedPreferencesUtil.getData(SP_TEXT_COLOR_DARK, textColor.dark()) as Int
         if (force) {
             drawConfName = ""
         }
@@ -514,16 +524,4 @@ class DateTimeDrawer {
         }
     }
 
-    /**
-     * 加深颜色
-     *
-     * @param color
-     * @return
-     */
-    private fun darkenColor(color: Int): Int {
-        val hsv = FloatArray(3)
-        Color.colorToHSV(color, hsv)
-        hsv[2] = hsv[2] * 0.5f
-        return Color.HSVToColor(hsv)
-    }
 }

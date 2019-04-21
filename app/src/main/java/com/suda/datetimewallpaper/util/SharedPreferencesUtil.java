@@ -15,6 +15,7 @@ public class SharedPreferencesUtil {
     public static final String SP_SCALE = "scale";
     public static final String SP_ROTATE = "rotate";
     public static final String SP_TEXT_COLOR = "text_color";
+    public static final String SP_TEXT_COLOR_DARK = "text_color_dark";
     public static final String SP_BG_COLOR = "bg_color";
     public static final String SP_BG_IMAGE = "SP_BG_IMAGE";
     public static final String SP_CUS_CONF = "SP_CUS_CONF";

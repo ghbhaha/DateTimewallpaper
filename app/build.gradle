@@ -29,6 +29,10 @@ android {
         }
     }
 
+    lintOptions {
+        abortOnError false
+    }
+
 
     buildTypes {
         release {
@@ -52,8 +56,8 @@ dependencies {
 //    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
     implementation 'com.github.bumptech.glide:glide:4.9.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.9.0'
+    kapt  'com.github.bumptech.glide:compiler:4.9.0'
     implementation 'com.zhihu.android:matisse:0.5.2-beta3'
-    implementation 'com.github.QuadFlask:colorpicker:0.0.13'
     implementation 'pub.devrel:easypermissions:3.0.0'
     implementation  'com.umeng.umsdk:analytics:7.5.4'
     implementation  'com.umeng.umsdk:common:1.5.4'
@@ -63,5 +67,6 @@ dependencies {
     implementation 'com.github.daniel-stoneuk:material-about-library:2.4.2'
     implementation 'com.squareup.okhttp3:okhttp:3.6.0'
     implementation 'com.squareup.okio:okio:1.11.0'
+    implementation 'com.jaredrummler:colorpicker:1.1.0'
 
 }
