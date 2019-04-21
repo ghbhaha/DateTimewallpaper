@@ -29,6 +29,7 @@ import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.suda.datetimewallpaper.about.AboutActivity;
 import com.suda.datetimewallpaper.adapter.CusAdapter;
 import com.suda.datetimewallpaper.util.AlipayDonate;
+import com.suda.datetimewallpaper.util.CheckUpdateUtil;
 import com.suda.datetimewallpaper.util.DownUtil;
 import com.suda.datetimewallpaper.util.FileUtil;
 import com.suda.datetimewallpaper.util.Glide4Engine;
@@ -110,6 +111,8 @@ public class MainActivity extends AppCompatActivity implements SeekBar.OnSeekBar
         setExcludeFromRecents(cbHideAct.isChecked());
 
         AlipayDonate.donateTip("gomain", 5, this);
+
+        CheckUpdateUtil.checkUpdate(this,false);
     }
 
     @Override
