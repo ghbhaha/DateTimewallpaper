@@ -41,10 +41,10 @@ public class CheckUpdateUtil {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (showDialog){
+                        if (showDialog) {
                             innerDialog.dismiss();
+                            Toast.makeText(activity, "请求失败", Toast.LENGTH_SHORT).show();
                         }
-                        Toast.makeText(activity, "请求失败", Toast.LENGTH_SHORT).show();
                     }
                 });
             }
@@ -55,7 +55,7 @@ public class CheckUpdateUtil {
                 activity.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        if (showDialog){
+                        if (showDialog) {
                             innerDialog.dismiss();
                         }
                         try {
@@ -88,10 +88,14 @@ public class CheckUpdateUtil {
                                 });
                                 innerDialog.show();
                             } else {
-                                Toast.makeText(activity, "未检查到更新", Toast.LENGTH_SHORT).show();
+                                if (showDialog) {
+                                    Toast.makeText(activity, "未检查到更新", Toast.LENGTH_SHORT).show();
+                                }
                             }
                         } catch (Exception e) {
-                            Toast.makeText(activity, "请求失败,请稍后重试", Toast.LENGTH_SHORT).show();
+                            if (showDialog) {
+                                Toast.makeText(activity, "请求失败,请稍后重试", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
                 });
