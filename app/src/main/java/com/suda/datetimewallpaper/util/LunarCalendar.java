@@ -17,6 +17,8 @@ public class LunarCalendar {
     private int day;
     private boolean leap;
     private final static String chineseNumber[] = {"一", "二", "三", "四", "五", "六", "七", "八", "九", "十", "十一", "十二"};
+    private final static String chineseMonthNumber[] = {"正", "二", "三", "四", "五", "六", "七", "八", "九", "十", "冬", "腊"};
+
     private final static SimpleDateFormat chineseDateFormat = new SimpleDateFormat("yyyy年MM月dd日");
     private final static long[] lunarInfo =
             new long[]{
@@ -159,12 +161,17 @@ public class LunarCalendar {
     public static String getChinaDayString(int day) {
         String chineseTen[] = {"初", "十", "廿", "卅"};
         int n = day % 10 == 0 ? 9 : day % 10 - 1;
-        if (day > 30)
+        if (day > 30) {
             return "";
-        if (day == 10)
+        } else if (day == 10) {
             return "初十";
-        else
+        } else if (day == 20) {
+            return "二十";
+        } else if (day == 30) {
+            return "三十";
+        } else {
             return chineseTen[day / 10] + chineseNumber[n];
+        }
     }
 
     @Override
@@ -182,7 +189,7 @@ public class LunarCalendar {
     }
 
     public String getMonthStr() {
-        return (leap ? "闰" : "") + chineseNumber[month - 1] + "月";
+        return (leap ? "闰" : "") + chineseMonthNumber[month - 1] + "月";
     }
 
     public String getDayStr() {

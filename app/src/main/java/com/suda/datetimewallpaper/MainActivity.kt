@@ -136,6 +136,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
     fun setTextColor(view: View) {
         ColorPickerDialog.newBuilder()
             .setDialogId(1)
+            .setShowAlphaSlider(true)
             .setColor(SharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.BLACK) as Int)
             .show(this)
     }
@@ -143,6 +144,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
     fun setTextColorDark(view: View) {
         ColorPickerDialog.newBuilder()
             .setDialogId(2)
+            .setShowAlphaSlider(true)
             .setColor(SharedPreferencesUtil.getData(SP_TEXT_COLOR_DARK, Color.BLACK.dark()) as Int)
             .show(this)
     }

@@ -48,7 +48,7 @@ public class LicenseActivity extends MaterialAboutActivity {
 
         MaterialAboutCard QuadFlaskLicenseCard = ConvenienceBuilder.createLicenseCard(c,
                 c.getResources().getDrawable(R.drawable.ic_book),
-                "QuadFlask", "2014-2017", "QuadFlask",
+                "Color Picker", "", "",
                 OpenSourceLicense.APACHE_2);
 
         MaterialAboutCard EasyPermissionsLicenseCard = ConvenienceBuilder.createLicenseCard(c,

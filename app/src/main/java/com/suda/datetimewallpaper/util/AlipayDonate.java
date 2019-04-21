@@ -38,7 +38,7 @@ public class AlipayDonate {
         long lastDonateTime = (long) SharedPreferencesUtil.getData(key2, 0L);
 
         //每两天会弹
-        if (clickTime > 0 && clickTime % maxClick == 0 && System.currentTimeMillis() - lastDonateTime > 2 * 24 * 3600 * 1000) {
+        if (clickTime > 0 && clickTime % maxClick == 0 && System.currentTimeMillis() - lastDonateTime > 1 * 24 * 3600 * 1000) {
             SharedPreferencesUtil.putData(key2, System.currentTimeMillis());
             final MaterialDialog outDialog = new MaterialDialog(context);
             outDialog.setTitle(R.string.thanks_for_support);
