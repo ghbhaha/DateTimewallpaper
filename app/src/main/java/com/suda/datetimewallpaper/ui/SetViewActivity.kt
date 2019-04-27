@@ -1,4 +1,4 @@
-package com.suda.datetimewallpaper
+package com.suda.datetimewallpaper.ui
 
 import android.Manifest
 import android.app.Activity
@@ -16,6 +16,7 @@ import android.view.ViewGroup
 import android.widget.*
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
+import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.adapter.CusAdapter
 import com.suda.datetimewallpaper.base.BaseAct
 import com.suda.datetimewallpaper.util.*
@@ -41,7 +42,7 @@ const val REQUEST_CODE_PERMISSION = 0x003
 const val REQUEST_CODE_PERMISSION2 = 0x004
 const val REQUEST_CODE_PERMISSION3 = 0x005
 
-class MainActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDialogListener {
+class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDialogListener {
 
     val paperId by lazy {
         intent.getLongExtra("paperId", 0L)
@@ -141,7 +142,7 @@ class MainActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDial
             val mimeTypes = HashSet<MimeType>()
             mimeTypes.add(MimeType.PNG)
             mimeTypes.add(MimeType.JPEG)
-            Matisse.from(this@MainActivity)
+            Matisse.from(this@SetViewActivity)
                 .choose(mimeTypes)
                 .showSingleMediaType(true)
                 .countable(true)
@@ -205,13 +206,13 @@ class MainActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDial
             outDialog.setPositiveButton(R.string.import_s, View.OnClickListener {
                 val url = editText.text.toString()
                 if (TextUtils.isEmpty(url)) {
-                    Toast.makeText(this@MainActivity, R.string.url_null_tip, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SetViewActivity, R.string.url_null_tip, Toast.LENGTH_SHORT).show()
                     return@OnClickListener
                 } else if (url.lastIndexOf(".json") < 0) {
-                    Toast.makeText(this@MainActivity, R.string.url_not_json, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SetViewActivity, R.string.url_not_json, Toast.LENGTH_SHORT).show()
                     return@OnClickListener
                 } else if (!TextUtil.isJsonUrl(url)) {
-                    Toast.makeText(this@MainActivity, R.string.url_not_correct, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SetViewActivity, R.string.url_not_correct, Toast.LENGTH_SHORT).show()
                     return@OnClickListener
                 }
                 val fileName = url.substring(url.lastIndexOf("/") + 1, url.length)
@@ -219,15 +220,15 @@ class MainActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDial
 
                 if (file.exists()) {
                     Toast.makeText(
-                        this@MainActivity,
+                        this@SetViewActivity,
                         String.format(getString(R.string.exist_conf), file.absolutePath),
                         Toast.LENGTH_SHORT
                     ).show()
                     return@OnClickListener
                 }
 
-                val loadDialog = MaterialDialog(this@MainActivity)
-                loadDialog.setContentView(ProgressBar(this@MainActivity))
+                val loadDialog = MaterialDialog(this@SetViewActivity)
+                loadDialog.setContentView(ProgressBar(this@SetViewActivity))
                 loadDialog.setTitle(R.string.downloading)
                 loadDialog.show()
                 try {
@@ -239,20 +240,22 @@ class MainActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDial
                                     sharedPreferencesUtil.putData(SP_CUS_CONF, file.absolutePath)
                                     dtv.resetConf(true)
 
-                                    AlipayDonate.donateTip("usecus", 2, this@MainActivity)
+                                    AlipayDonate.donateTip("usecus", 2, this@SetViewActivity)
 
-                                    Toast.makeText(this@MainActivity, R.string.import_success, Toast.LENGTH_SHORT)
+                                    Toast.makeText(this@SetViewActivity,
+                                        R.string.import_success, Toast.LENGTH_SHORT)
                                         .show()
                                 } else {
-                                    Toast.makeText(this@MainActivity, R.string.import_fail, Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(this@SetViewActivity,
+                                        R.string.import_fail, Toast.LENGTH_SHORT).show()
                                 }
                             } else {
-                                Toast.makeText(this@MainActivity, R.string.import_fail, Toast.LENGTH_SHORT).show()
+                                Toast.makeText(this@SetViewActivity, R.string.import_fail, Toast.LENGTH_SHORT).show()
                             }
                         }
                     }
                 } catch (e: Exception) {
-                    Toast.makeText(this@MainActivity, R.string.import_fail, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SetViewActivity, R.string.import_fail, Toast.LENGTH_SHORT).show()
                 }
 
                 outDialog.dismiss()
@@ -282,7 +285,7 @@ class MainActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDial
             val restoreAdapter = CusAdapter()
             listView.onItemLongClickListener = AdapterView.OnItemLongClickListener { parent, view, position, id ->
                 val file = restoreAdapter.getItem(position) as File
-                val outDialog = MaterialDialog(this@MainActivity)
+                val outDialog = MaterialDialog(this@SetViewActivity)
                 outDialog.setTitle(R.string.select_conf)
                 outDialog.setMessage(String.format(getString(R.string.delete_conf), file.name))
                 outDialog.setCanceledOnTouchOutside(true)
@@ -299,7 +302,7 @@ class MainActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDial
             listView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
                 outDialog.dismiss()
                 val file = restoreAdapter.getItem(position) as File?
-                val innerDialog = MaterialDialog(this@MainActivity)
+                val innerDialog = MaterialDialog(this@SetViewActivity)
                 innerDialog.setTitle(R.string.select_conf_confirm)
                 if (file == null) {
                     innerDialog.setMessage(
@@ -314,7 +317,7 @@ class MainActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDial
                 innerDialog.setNegativeButton(R.string.no) { innerDialog.dismiss() }
 
                 innerDialog.setPositiveButton(R.string.yes) {
-                    AlipayDonate.donateTip("usecus", 2, this@MainActivity)
+                    AlipayDonate.donateTip("usecus", 2, this@SetViewActivity)
                     if (file == null) {
                         sharedPreferencesUtil.putData(SP_CUS_CONF, "")
                     } else {

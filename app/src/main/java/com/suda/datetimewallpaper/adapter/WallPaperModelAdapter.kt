@@ -10,7 +10,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.zhouwei.library.CustomPopWindow
-import com.suda.datetimewallpaper.MainActivity
+import com.suda.datetimewallpaper.ui.SetViewActivity
 import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.bean.WallPaperModel
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil
@@ -44,7 +44,7 @@ class WallPaperModelAdapter(val wallpaperModels: MutableList<WallPaperModel>) :
                 .showAsDropDown(holder.arrowBt_Inner, 0, 0)
 
             contentView.findViewById<View>(R.id.edit_conf).setOnClickListener {
-                val intent = Intent(it.context, MainActivity::class.java)
+                val intent = Intent(it.context, SetViewActivity::class.java)
                 intent.putExtra("paperId", wallpaperModels[position].paperId)
                 it.context.startActivity(intent)
                 window.dissmiss()

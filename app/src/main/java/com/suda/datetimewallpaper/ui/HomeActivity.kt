@@ -1,4 +1,4 @@
-package com.suda.datetimewallpaper
+package com.suda.datetimewallpaper.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,6 +8,7 @@ import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.navigation.NavigationView
+import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.about.AboutActivity
 import com.suda.datetimewallpaper.adapter.WallPaperModelAdapter
 import com.suda.datetimewallpaper.base.BaseAct
