@@ -24,8 +24,12 @@ final public class DateTimeView extends SurfaceView implements SurfaceHolder.Cal
 
     private void init() {
         dateTimeDrawer = new DateTimeDrawer();
-        dateTimeDrawer.init(getHolder(), getContext(),false);
+        dateTimeDrawer.init(getHolder(), getContext(), false, 0);
         this.getHolder().addCallback(this);
+    }
+
+    public void resetPaperId(long paperId) {
+        dateTimeDrawer.resetPaperId(paperId);
     }
 
     public void resetConf(boolean force) {
@@ -34,6 +38,7 @@ final public class DateTimeView extends SurfaceView implements SurfaceHolder.Cal
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
+        dateTimeDrawer.onSurfaceChange(getWidth(), getHeight());
         dateTimeDrawer.onVisibilityChanged(true);
     }
 

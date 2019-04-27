@@ -14,15 +14,13 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import com.jaredrummler.android.colorpicker.ColorPickerDialog
 import com.jaredrummler.android.colorpicker.ColorPickerDialogListener
-import com.suda.datetimewallpaper.about.AboutActivity
 import com.suda.datetimewallpaper.adapter.CusAdapter
+import com.suda.datetimewallpaper.base.BaseAct
 import com.suda.datetimewallpaper.util.*
 import com.suda.datetimewallpaper.util.FileUtil.copyFile
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil.*
-import com.umeng.analytics.MobclickAgent
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import kotlinx.android.synthetic.main.activity_main.*
@@ -43,8 +41,15 @@ const val REQUEST_CODE_PERMISSION = 0x003
 const val REQUEST_CODE_PERMISSION2 = 0x004
 const val REQUEST_CODE_PERMISSION3 = 0x005
 
-class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, ColorPickerDialogListener {
+class MainActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerDialogListener {
 
+    val paperId by lazy {
+        intent.getLongExtra("paperId", 0L)
+    }
+
+    val sharedPreferencesUtil by lazy {
+        SharedPreferencesUtil(this, paperId)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,11 +61,15 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
             } else {
                 View.VISIBLE
             }
-            bt_set_wallpaper.visibility = if (bt_set_wallpaper.visibility == View.VISIBLE) {
-                View.GONE
-            } else {
-                View.VISIBLE
-            }
+//            bt_set_wallpaper.visibility = if (bt_set_wallpaper.visibility == View.VISIBLE) {
+//                View.GONE
+//            } else {
+//                View.VISIBLE
+//            }
+        }
+
+        dtv.post {
+            dtv.resetPaperId(paperId)
         }
 
         panel.setOnTouchListener { _, _ -> true }
@@ -69,47 +78,19 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
         setProgress(R.id.horizontal_margin, SP_VERTICAL_POS, 0.5f)
         setProgress(R.id.scale, SP_VERTICAL_POS, 0.25f)
         setProgress(R.id.rotate, SP_VERTICAL_POS, 0f)
-
-        cb_num_format.isChecked = SharedPreferencesUtil.getData(SP_NUM_FORMAT, true) as Boolean
-        cb_num_format.setOnCheckedChangeListener { _, isChecked ->
-            SharedPreferencesUtil.putData(SP_NUM_FORMAT, isChecked)
-            dtv.resetConf(true)
-        }
-
-        cb_hide_act.isChecked = SharedPreferencesUtil.getData(SP_HIDE_ACT, false) as Boolean
-        cb_hide_act.setOnCheckedChangeListener { _, isChecked ->
-            SharedPreferencesUtil.putData(SP_HIDE_ACT, isChecked)
-            setExcludeFromRecents(isChecked)
-            dtv.resetConf(false)
-        }
-        showHideNumFormat()
-        setExcludeFromRecents(cb_hide_act.isChecked)
-
-        AlipayDonate.donateTip("gomain", 5, this)
-        CheckUpdateUtil.checkUpdate(this, false)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        MobclickAgent.onResume(this)
-    }
-
-    override fun onPause() {
-        super.onPause()
-        MobclickAgent.onPause(this)
     }
 
     private fun setProgress(id: Int, sp: String, defaultValue: Float) {
         val seekBar = findViewById<SeekBar>(id)
-        seekBar.progress = (100 * SharedPreferencesUtil.getData(sp, defaultValue) as Float).toInt()
+        seekBar.progress = (100 * sharedPreferencesUtil.getData(sp, defaultValue) as Float).toInt()
         seekBar.setOnSeekBarChangeListener(this)
     }
 
     override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
         var progress = progress
         when (seekBar.id) {
-            R.id.vertical_margin -> SharedPreferencesUtil.putData(SP_VERTICAL_POS, progress * 1.0f / 100)
-            R.id.horizontal_margin -> SharedPreferencesUtil.putData(
+            R.id.vertical_margin -> sharedPreferencesUtil.putData(SP_VERTICAL_POS, progress * 1.0f / 100)
+            R.id.horizontal_margin -> sharedPreferencesUtil.putData(
                 SharedPreferencesUtil.SP_HORIZONTAL_POS,
                 progress * 1.0f / 100
             )
@@ -117,9 +98,9 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
                 if (Math.abs(progress % 25 - 1) < 1) {
                     progress = progress / 25 * 25
                 }
-                SharedPreferencesUtil.putData(SharedPreferencesUtil.SP_ROTATE, progress * 1.0f / 100)
+                sharedPreferencesUtil.putData(SharedPreferencesUtil.SP_ROTATE, progress * 1.0f / 100)
             }
-            R.id.scale -> SharedPreferencesUtil.putData(SharedPreferencesUtil.SP_SCALE, progress * 1.0f / 100)
+            R.id.scale -> sharedPreferencesUtil.putData(SharedPreferencesUtil.SP_SCALE, progress * 1.0f / 100)
         }
         dtv.resetConf(false)
     }
@@ -137,7 +118,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
         ColorPickerDialog.newBuilder()
             .setDialogId(1)
             .setShowAlphaSlider(true)
-            .setColor(SharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.BLACK) as Int)
+            .setColor(sharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.BLACK) as Int)
             .show(this)
     }
 
@@ -145,7 +126,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
         ColorPickerDialog.newBuilder()
             .setDialogId(2)
             .setShowAlphaSlider(true)
-            .setColor(SharedPreferencesUtil.getData(SP_TEXT_COLOR_DARK, Color.BLACK.dark()) as Int)
+            .setColor(sharedPreferencesUtil.getData(SP_TEXT_COLOR_DARK, Color.BLACK.dark()) as Int)
             .show(this)
     }
 
@@ -181,18 +162,18 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
     fun setBackColor(view: View) {
         ColorPickerDialog.newBuilder()
             .setDialogId(3)
-            .setColor(SharedPreferencesUtil.getData(SP_BG_COLOR, Color.BLACK) as Int)
+            .setColor(sharedPreferencesUtil.getData(SP_BG_COLOR, Color.BLACK) as Int)
             .show(this)
     }
 
     override fun onColorSelected(p0: Int, p1: Int) {
         if (p0 == 1) {
-            SharedPreferencesUtil.putData(SP_TEXT_COLOR, p1)
+            sharedPreferencesUtil.putData(SP_TEXT_COLOR, p1)
         } else if (p0 == 2) {
-            SharedPreferencesUtil.putData(SP_TEXT_COLOR_DARK, p1)
+            sharedPreferencesUtil.putData(SP_TEXT_COLOR_DARK, p1)
         } else if (p0 == 3) {
-            SharedPreferencesUtil.putData(SP_BG_COLOR, p1)
-            SharedPreferencesUtil.putData(SP_BG_IMAGE, "")
+            sharedPreferencesUtil.putData(SP_BG_COLOR, p1)
+            sharedPreferencesUtil.putData(SP_BG_IMAGE, "")
         }
         dtv.resetConf(false)
     }
@@ -203,30 +184,6 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
 
     fun setWallPaper(view: View) {
         WallpaperUtil.setLiveWallpaper(this, REQUEST_CODE_SET_WALLPAPER)
-        //        android.provider.Settings.System.putString(getContentResolver(), "lock_wallpaper_provider_authority", "com.android.thememanager.theme_lock_live_wallpaper");
-        //        if (!WallpaperUtil.wallpaperIsUsed(this)) {
-        //            WallpaperUtil.setLiveWallpaper(this, REQUEST_CODE_SET_WALLPAPER);
-        //        } else {
-        //            Toast.makeText(this, "壁纸已经设置", Toast.LENGTH_SHORT).show();
-        //        }
-    }
-
-    fun about(view: View) {
-        val intent = Intent(this, AboutActivity::class.java)
-        startActivity(intent)
-    }
-
-    fun donateZFB(view: View) {
-        Toast.makeText(this, "感谢支持,时间轮盘将越来越好", Toast.LENGTH_SHORT).show()
-        AlipayDonate.startAlipayClient(this@MainActivity, "apqiqql0hgh5pmv54d")
-    }
-
-    private fun showHideNumFormat() {
-        if ("" == SharedPreferencesUtil.getData(SP_CUS_CONF, "")) {
-            findViewById<View>(R.id.cb_num_format).visibility = View.VISIBLE
-        } else {
-            findViewById<View>(R.id.cb_num_format).visibility = View.GONE
-        }
     }
 
     fun setCusConfFromNet(view: View) {
@@ -279,7 +236,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
                             loadDialog.dismiss()
                             if (code == 1) {
                                 if (file.exists()) {
-                                    SharedPreferencesUtil.putData(SP_CUS_CONF, file.absolutePath)
+                                    sharedPreferencesUtil.putData(SP_CUS_CONF, file.absolutePath)
                                     dtv.resetConf(true)
 
                                     AlipayDonate.donateTip("usecus", 2, this@MainActivity)
@@ -359,11 +316,10 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
                 innerDialog.setPositiveButton(R.string.yes) {
                     AlipayDonate.donateTip("usecus", 2, this@MainActivity)
                     if (file == null) {
-                        SharedPreferencesUtil.putData(SP_CUS_CONF, "")
+                        sharedPreferencesUtil.putData(SP_CUS_CONF, "")
                     } else {
-                        SharedPreferencesUtil.putData(SP_CUS_CONF, file.absolutePath)
+                        sharedPreferencesUtil.putData(SP_CUS_CONF, file.absolutePath)
                     }
-                    showHideNumFormat()
                     dtv.resetConf(true)
                     innerDialog.dismiss()
                 }
@@ -394,7 +350,7 @@ class MainActivity : AppCompatActivity(), SeekBar.OnSeekBarChangeListener, Color
             val dst = File(filesDir, org.name)
             try {
                 copyFile(org, dst)
-                SharedPreferencesUtil.putData(SP_BG_IMAGE, dst.absolutePath)
+                sharedPreferencesUtil.putData(SP_BG_IMAGE, dst.absolutePath)
             } catch (e: IOException) {
                 e.printStackTrace()
             }

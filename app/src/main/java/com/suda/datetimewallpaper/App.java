@@ -13,9 +13,7 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        SharedPreferencesUtil.getInstance(this, getPackageName());
         MobclickAgent.setScenarioType(this, MobclickAgent.EScenarioType.E_UM_NORMAL);
-
         UMConfigure.init(this, UMConfigure.DEVICE_TYPE_PHONE, null);
     }
 }

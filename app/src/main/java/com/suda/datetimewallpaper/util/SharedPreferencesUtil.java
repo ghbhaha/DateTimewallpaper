@@ -2,6 +2,13 @@ package com.suda.datetimewallpaper.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import com.alibaba.fastjson.JSON;
+import com.suda.datetimewallpaper.bean.WallPaperModel;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * @author guhaibo
@@ -20,28 +27,22 @@ public class SharedPreferencesUtil {
     public static final String SP_BG_IMAGE = "SP_BG_IMAGE";
     public static final String SP_CUS_CONF = "SP_CUS_CONF";
 
+    public static final String SP_CONFS = "SP_CONFS";
 
     public static final String SP_HIDE_ACT = "hide_act";
 
 
-    private static SharedPreferencesUtil util;
-    private static SharedPreferences sp;
+    private SharedPreferences sp;
+    private Context context;
 
-    private SharedPreferencesUtil(Context context, String name) {
-        sp = context.getSharedPreferences(name, Context.MODE_PRIVATE);
+    public SharedPreferencesUtil(Context context) {
+        this.context = context;
+        sp = context.getSharedPreferences(context.getPackageName(), Context.MODE_PRIVATE);
     }
 
-    /**
-     * 初始化SharedPreferencesUtil,只需要初始化一次，建议在Application中初始化
-     *
-     * @param context 上下文对象
-     * @param name    SharedPreferences Name
-     */
-    public static SharedPreferencesUtil getInstance(Context context, String name) {
-        if (util == null) {
-            util = new SharedPreferencesUtil(context, name);
-        }
-        return util;
+    public SharedPreferencesUtil(Context context, Long paperId) {
+        this.context = context;
+        sp = context.getSharedPreferences(context.getPackageName() + ":" + paperId, Context.MODE_PRIVATE);
     }
 
     /**
@@ -51,7 +52,7 @@ public class SharedPreferencesUtil {
      * @param value 需要保存的数据
      * @return 保存结果
      */
-    public static boolean putData(String key, Object value) {
+    public boolean putData(String key, Object value) {
         boolean result;
         SharedPreferences.Editor editor = sp.edit();
         String type = value.getClass().getSimpleName();
@@ -91,7 +92,7 @@ public class SharedPreferencesUtil {
      * @param defaultValue 获取失败默认值
      * @return 从SharedPreferences读取的数据
      */
-    public static Object getData(String key, Object defaultValue) {
+    public <T> T getData(String key, T defaultValue) {
         Object result;
         String type = defaultValue.getClass().getSimpleName();
         try {
@@ -119,7 +120,107 @@ public class SharedPreferencesUtil {
             result = null;
             e.printStackTrace();
         }
-        return result;
+        return (T) result;
     }
 
+    public List<WallPaperModel> getWallpapermodels() {
+        String confs = getData(SharedPreferencesUtil.SP_CONFS, "");
+        if (confs.isEmpty()) {
+            WallPaperModel wallPaperModel = new WallPaperModel("默认样式", 0, true, 0);
+
+
+            SharedPreferencesUtil _0sp = new SharedPreferencesUtil(context, 0L);
+            SharedPreferencesUtil _def_sp = new SharedPreferencesUtil(context);
+
+            _0sp.putData(SP_NUM_FORMAT, _def_sp.getData(SP_NUM_FORMAT, true));
+            _0sp.putData(SP_VERTICAL_POS, _def_sp.getData(SP_VERTICAL_POS, 0.5f));
+            _0sp.putData(SP_HORIZONTAL_POS, _def_sp.getData(SP_HORIZONTAL_POS, 0.5f));
+            _0sp.putData(SP_ROTATE, _def_sp.getData(SP_ROTATE, 0f));
+            _0sp.putData(SP_TEXT_COLOR_DARK, _def_sp.getData(SP_TEXT_COLOR_DARK, Color.GRAY));
+            _0sp.putData(SP_TEXT_COLOR, _def_sp.getData(SP_TEXT_COLOR, Color.WHITE));
+            _0sp.putData(SP_BG_COLOR, _def_sp.getData(SP_BG_COLOR, Color.BLACK));
+            _0sp.putData(SP_BG_IMAGE, _def_sp.getData(SP_BG_IMAGE, ""));
+            _0sp.putData(SP_CUS_CONF, _def_sp.getData(SP_CUS_CONF, ""));
+
+            List modelList = new ArrayList();
+            modelList.add(wallPaperModel);
+            confs = JSON.toJSONString(modelList);
+            putData(SharedPreferencesUtil.SP_CONFS, confs);
+        }
+        return JSON.parseArray(confs, WallPaperModel.class);
+    }
+
+    public WallPaperModel addNewDefaultModel() {
+        List<WallPaperModel> wallPaperModels = getWallpapermodels();
+        WallPaperModel wallPaperModel = new WallPaperModel("默认样式", System.currentTimeMillis(), false, wallPaperModels.get(wallPaperModels.size() - 1).getOrderId() + 1);
+        wallPaperModels.add(wallPaperModel);
+        putData(SharedPreferencesUtil.SP_CONFS, JSON.toJSONString(wallPaperModels));
+        return wallPaperModel;
+    }
+
+    public void deleteConf(long paperId) {
+        List<WallPaperModel> wallPaperModels = getWallpapermodels();
+        Iterator<WallPaperModel> iterator = wallPaperModels.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getPaperId() == paperId) {
+                iterator.remove();
+            }
+        }
+        putData(SharedPreferencesUtil.SP_CONFS, JSON.toJSONString(wallPaperModels));
+    }
+
+    public void editName(long paperId, String paperName) {
+        List<WallPaperModel> wallPaperModels = getWallpapermodels();
+        Iterator<WallPaperModel> iterator = wallPaperModels.iterator();
+        while (iterator.hasNext()) {
+            WallPaperModel wallPaperModel = iterator.next();
+            if (wallPaperModel.getPaperId() == paperId) {
+                wallPaperModel.setModelName(paperName);
+            }
+        }
+        putData(SharedPreferencesUtil.SP_CONFS, JSON.toJSONString(wallPaperModels));
+    }
+
+    public long getNextWallPaper() {
+        List<WallPaperModel> wallPaperModels = getWallpapermodels();
+        long last = sp.getLong("last", -1L);
+        long tmp = last;
+        Iterator<WallPaperModel> iterator = wallPaperModels.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getPaperId() == last) {
+                if (iterator.hasNext()) {
+                    tmp = iterator.next().getPaperId();
+                }
+            }
+        }
+        if (last == tmp) {
+            last = wallPaperModels.get(0).getPaperId();
+        } else {
+            last = tmp;
+        }
+
+        sp.edit().putLong("last", last).apply();
+        return last;
+    }
+
+    public long getNextWallPaperDream() {
+        List<WallPaperModel> wallPaperModels = getWallpapermodels();
+        long last = sp.getLong("lastDream", -1L);
+        long tmp = last;
+        Iterator<WallPaperModel> iterator = wallPaperModels.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next().getPaperId() == last) {
+                if (iterator.hasNext()) {
+                    tmp = iterator.next().getPaperId();
+                }
+            }
+        }
+        if (last == tmp) {
+            last = wallPaperModels.get(0).getPaperId();
+        } else {
+            last = tmp;
+        }
+        sp.edit().putLong("lastDream", last).apply();
+        return last;
+    }
 }

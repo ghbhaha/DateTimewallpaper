@@ -1,11 +1,7 @@
 package com.suda.datetimewallpaper.util;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.ClipData;
-import android.content.ClipboardManager;
-import android.content.Context;
-import android.content.Intent;
+import android.content.*;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -13,12 +9,10 @@ import android.os.Build;
 import android.service.quicksettings.TileService;
 import android.view.View;
 import android.widget.Toast;
-
 import com.suda.datetimewallpaper.R;
+import me.drakeet.materialdialog.MaterialDialog;
 
 import java.net.URISyntaxException;
-
-import me.drakeet.materialdialog.MaterialDialog;
 
 /**
  * Created by didikee on 2017/7/21.
@@ -29,17 +23,18 @@ public class AlipayDonate {
 
     public static void donateTip(String key, int maxClick, final Context context) {
 
+        SharedPreferencesUtil sharedPreferencesUtil = new SharedPreferencesUtil(context);
         String key1 = "DONATE:" + key;
         final String key2 = "lastClickTime:" + key;
 
-        int clickTime = (int) SharedPreferencesUtil.getData(key1, 0);
-        SharedPreferencesUtil.putData(key1, clickTime + 1);
+        int clickTime = sharedPreferencesUtil.getData(key1, 0);
+        sharedPreferencesUtil.putData(key1, clickTime + 1);
 
-        long lastDonateTime = (long) SharedPreferencesUtil.getData(key2, 0L);
+        long lastDonateTime = sharedPreferencesUtil.getData(key2, 0L);
 
         //每两天会弹
         if (clickTime > 0 && clickTime % maxClick == 0 && System.currentTimeMillis() - lastDonateTime > 1 * 24 * 3600 * 1000) {
-            SharedPreferencesUtil.putData(key2, System.currentTimeMillis());
+            sharedPreferencesUtil.putData(key2, System.currentTimeMillis());
             final MaterialDialog outDialog = new MaterialDialog(context);
             outDialog.setTitle(R.string.thanks_for_support);
             outDialog.setMessage(R.string.donate_tip);
@@ -86,7 +81,7 @@ public class AlipayDonate {
      * 这个方法最好，但在 2016 年 8 月发现新用户可能无法使用
      *
      * @param activity Parent Activity
-     * @param urlCode  手动解析二维码获得地址中的参数，例如 https://qr.alipay.com/aehvyvf4taua18zo6e 最后那段
+     * @param payCode  手动解析二维码获得地址中的参数，例如 https://qr.alipay.com/aehvyvf4taua18zo6e 最后那段
      * @return 是否成功调用
      */
     public static boolean startAlipayClient(Activity activity, String payCode) {

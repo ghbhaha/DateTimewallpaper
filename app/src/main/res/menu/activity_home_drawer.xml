@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:id="@+id/group_about">
+
+        <item
+                android:id="@+id/set_wallpaper"
+                android:icon="@drawable/ic_monetization_on"
+                android:title="@string/set_wallpaper"/>
+
+        <item
+                android:id="@+id/nav_donate"
+                android:icon="@drawable/ic_monetization_on"
+                android:title="@string/donate_zfb"/>
+
+        <item
+                android:id="@+id/nav_about"
+                android:icon="@drawable/ic_action_info"
+                android:title="@string/about"/>
+    </group>
+</menu>

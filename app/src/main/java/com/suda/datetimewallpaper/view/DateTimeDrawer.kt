@@ -1,13 +1,12 @@
 package com.suda.datetimewallpaper.view
 
+import android.app.Service
 import android.content.Context
 import android.graphics.*
 import android.media.ExifInterface
 import android.os.Build
 import android.text.TextUtils
-import android.util.DisplayMetrics
 import android.view.SurfaceHolder
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.collection.ArrayMap
 import com.alibaba.fastjson.JSON
@@ -30,6 +29,9 @@ import java.util.concurrent.atomic.AtomicBoolean
  * @date 2019/4/9
  */
 class DateTimeDrawer {
+
+    private var surfaceWidth = 0
+    private var surfaceHeight = 0
 
     private var circleBaseline = 0f
 
@@ -93,6 +95,8 @@ class DateTimeDrawer {
      * 优化反复创建SimpleDateFormat
      */
     private val simpleDateFormatMap = ArrayMap<String, SimpleDateFormat>()
+
+    private var sharedPreferencesUtil: SharedPreferencesUtil? = null
 
     private val refreshTask = object : TimerTask() {
         override fun run() {
@@ -338,7 +342,8 @@ class DateTimeDrawer {
      * @param context
      * @param userHardCanvas
      */
-    fun init(holder: SurfaceHolder, context: Context, userHardCanvas: Boolean) {
+    fun init(holder: SurfaceHolder, context: Context, userHardCanvas: Boolean, paperId: Long) {
+        this.sharedPreferencesUtil = SharedPreferencesUtil(context, paperId)
         this.useHardCanvas = userHardCanvas
         this.canUseHardCanvas = !OSHelper.isMIUI()
         clockPaint.isAntiAlias = true
@@ -347,23 +352,24 @@ class DateTimeDrawer {
         surfaceHolder = holder
     }
 
+    fun resetPaperId(paperId: Long) {
+        this.sharedPreferencesUtil = SharedPreferencesUtil(context, paperId)
+        resetConf(true)
+    }
+
     /**
      * 重新配置
      */
     fun resetConf(force: Boolean) {
         start.set(false)
-        verticalPos = SharedPreferencesUtil.getData(SP_VERTICAL_POS, 0.5f) as Float
-        horizontalPos = SharedPreferencesUtil.getData(SP_HORIZONTAL_POS, 0.5f) as Float
-        rotate = SharedPreferencesUtil.getData(SP_ROTATE, 0f) as Float
+        verticalPos = sharedPreferencesUtil?.getData(SP_VERTICAL_POS, 0.5f) as Float
+        horizontalPos = sharedPreferencesUtil?.getData(SP_HORIZONTAL_POS, 0.5f) as Float
+        rotate = sharedPreferencesUtil?.getData(SP_ROTATE, 0f) as Float
 
+        scale = (2 * sharedPreferencesUtil?.getData(SP_SCALE, 0.25f) as Float + 0.5f) * 0.52f * (surfaceWidth / 1080f)
 
-        val windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-        val dm = DisplayMetrics()
-        windowManager.defaultDisplay.getRealMetrics(dm)
-        scale = (2 * SharedPreferencesUtil.getData(SP_SCALE, 0.25f) as Float + 0.5f) * 0.52f * (dm.widthPixels / 1080f)
-
-        textColor = SharedPreferencesUtil.getData(SP_TEXT_COLOR, Color.WHITE) as Int
-        darkenTextColor = SharedPreferencesUtil.getData(SP_TEXT_COLOR_DARK, textColor.dark()) as Int
+        textColor = sharedPreferencesUtil?.getData(SP_TEXT_COLOR, Color.WHITE) as Int
+        darkenTextColor = sharedPreferencesUtil?.getData(SP_TEXT_COLOR_DARK, textColor.dark()) as Int
         if (force) {
             drawConfName = ""
         }
@@ -378,7 +384,7 @@ class DateTimeDrawer {
     }
 
     private fun resetJsonConf() {
-        var cus: String = SharedPreferencesUtil.getData(SP_CUS_CONF, "") as String
+        var cus: String = sharedPreferencesUtil?.getData(SP_CUS_CONF, "") as String
         if (!TextUtils.isEmpty(cus)) {
             if (cus != drawConfName) {
                 drawConfName = cus
@@ -395,7 +401,7 @@ class DateTimeDrawer {
                 setCircleTextAndCalDis()
             }
         } else {
-            val numFormat = SharedPreferencesUtil.getData(SP_NUM_FORMAT, true) as Boolean
+            val numFormat = sharedPreferencesUtil?.getData(SP_NUM_FORMAT, true) as Boolean
             if (numFormat) {
                 cus = "default1.json"
             } else {
@@ -442,8 +448,11 @@ class DateTimeDrawer {
      * 设置背景
      */
     private fun setBg() {
-        bgColor = SharedPreferencesUtil.getData(SP_BG_COLOR, Color.BLACK) as Int
-        val tmpBg = SharedPreferencesUtil.getData(SP_BG_IMAGE, "") as String
+        if (surfaceWidth == 0 || surfaceHeight == 0) {
+            return
+        }
+        bgColor = sharedPreferencesUtil?.getData(SP_BG_COLOR, Color.BLACK) as Int
+        val tmpBg = sharedPreferencesUtil?.getData(SP_BG_IMAGE, "") as String
         if (!TextUtils.isEmpty(tmpBg) && tmpBg != bgImg) {
             val options = BitmapFactory.Options()
             options.inJustDecodeBounds = true
@@ -451,22 +460,16 @@ class DateTimeDrawer {
             //图片的宽高
             val outHeight = options.outHeight
             val outWidth = options.outWidth
-            val windowManager = context!!.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-            val dm = DisplayMetrics()
-            windowManager.defaultDisplay.getRealMetrics(dm)
-            val sHeigth = dm.heightPixels
-            val sWidth = dm.widthPixels
-
             val p1 = outHeight * 1.0f / outWidth
-            val p2 = sHeigth * 1.0f / sWidth
+            val p2 = surfaceHeight * 1.0f / surfaceWidth
             val matrix = Matrix()
-            matrix.postTranslate((sWidth - outWidth) * 1f / 2, (sHeigth - outHeight) * 1f / 2)
+            matrix.postTranslate((surfaceWidth - outWidth) * 1f / 2, (surfaceHeight - outHeight) * 1f / 2)
 
             val scale: Float
             if (p1 < p2) {
-                scale = sHeigth * 1f / outHeight
+                scale = surfaceHeight * 1f / outHeight
             } else {
-                scale = sWidth * 1f / outWidth
+                scale = surfaceWidth * 1f / outWidth
             }
 
             var tag = 0
@@ -487,12 +490,12 @@ class DateTimeDrawer {
                 degree = 270
             }
 
-            matrix.postRotate(degree.toFloat(), (sWidth / 2).toFloat(), (sHeigth / 2).toFloat())
-            matrix.postScale(scale, scale, (sWidth / 2).toFloat(), (sHeigth / 2).toFloat())
+            matrix.postRotate(degree.toFloat(), (surfaceWidth / 2).toFloat(), (surfaceHeight / 2).toFloat())
+            matrix.postScale(scale, scale, (surfaceWidth / 2).toFloat(), (surfaceHeight / 2).toFloat())
             //图片格式压缩
             options.inJustDecodeBounds = false
             val bitmap = BitmapFactory.decodeFile(tmpBg, options)
-            bgBitmap = Bitmap.createBitmap(sWidth, sHeigth, Bitmap.Config.ARGB_8888)
+            bgBitmap = Bitmap.createBitmap(surfaceWidth, surfaceHeight, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bgBitmap!!)
             canvas.drawBitmap(bitmap, matrix, Paint())
         } else if (TextUtils.isEmpty(tmpBg)) {
@@ -511,17 +514,25 @@ class DateTimeDrawer {
             return
         }
         if (visible) {
-            resetConf(true)
             scheduledFuture =
                 scheduledThreadPool.scheduleAtFixedRate(refreshTask, 0, schedule.toLong(), TimeUnit.MILLISECONDS)
+            resetConf(true)
         } else {
             if (scheduledFuture != null) {
                 scheduledFuture!!.cancel(true)
-                bgImg = ""
-                bgBitmap = null
+                if (context !is Service) {
+                    bgImg = ""
+                    bgBitmap = null
+                }
             }
             System.gc()
         }
     }
 
+    fun onSurfaceChange(width: Int, height: Int) {
+        surfaceWidth = width
+        surfaceHeight = height
+        bgImg = ""
+        setBg()
+    }
 }
