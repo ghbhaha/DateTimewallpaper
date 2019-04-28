@@ -3,9 +3,9 @@
     <group android:id="@+id/group_about">
 
         <item
-                android:id="@+id/set_wallpaper"
-                android:icon="@drawable/ic_monetization_on"
-                android:title="@string/set_wallpaper"/>
+                android:id="@+id/settings"
+                android:icon="@drawable/ic_settings"
+                android:title="@string/settings"/>
 
         <item
                 android:id="@+id/nav_donate"

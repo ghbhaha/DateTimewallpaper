@@ -29,7 +29,7 @@ final public class DateTimeView extends SurfaceView implements SurfaceHolder.Cal
     }
 
     public void resetPaperId(long paperId) {
-        dateTimeDrawer.resetPaperId(paperId);
+        dateTimeDrawer.resetPaperId(paperId, true);
     }
 
     public void resetConf(boolean force) {

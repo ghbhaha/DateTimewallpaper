@@ -2,7 +2,6 @@
     <string name="app_name">时间轮盘</string>
     <string name="storage_permission">时间轮盘需要存储权限选择图片</string>
     <string name="num_format">大写数字</string>
-    <string name="hide_from_recent">最近任务隐藏</string>
     <string name="donate_zfb">打赏</string>
     <string name="vertical_pos">垂直位置</string>
     <string name="horizontal_pos">水平位置</string>
@@ -19,7 +18,7 @@
     <string name="select_conf">选择配置</string>
     <string name="select_conf_1">选择配置\'%s\'</string>
     <string name="select_conf_confirm">确认选择配置</string>
-    <string name="select_conf_default">恢复默认</string>
+    <string name="select_conf_default">默认配置</string>
     <string name="plz_enter_conf_url">请输入下载直链</string>
     <string name="import_s">导入</string>
     <string name="url_null_tip">请求不能为空</string>
@@ -44,4 +43,14 @@
         <item quantity="one">You can only select one media file</item>
         <item quantity="many">You can only select up to %1$d media files</item>
     </plurals>
+
+    <string name="click_change">百变轮盘</string>
+    <string name="click_change_summary">通过三击桌面切换配置</string>
+
+    <string name="hide_from_recent">任务隐藏</string>
+    <string name="hide_from_recent_summary">在最近任务管理器中隐藏时间轮盘</string>
+
+    <string name="rotate_forever">永动模式</string>
+    <string name="rotate_forever_summary">轮盘将不停转动，可能会非常耗电</string>
+
 </resources>

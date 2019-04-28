@@ -47,7 +47,7 @@
             fab:menu_fab_size="normal"
             fab:menu_showShadow="true"
             fab:menu_shadowColor="#66000000"
-            fab:menu_colorNormal="#DA4336"
+            fab:menu_colorNormal="@color/colorAccent"
             fab:menu_colorPressed="#E75043"
             fab:menu_colorRipple="#99FFFFFF"
             fab:menu_animationDelayPerItem="50"
@@ -73,21 +73,28 @@
             fab:menu_labels_maxLines="-1">
 
         <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/menu_add"
+                android:id="@+id/menu_add_default"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_action_add"
                 fab:fab_size="mini"
-                fab:fab_label="添加"/>
-
+                fab:fab_label="添加默认"/>
 
         <com.github.clans.fab.FloatingActionButton
-                android:id="@+id/menu_setting"
+                android:id="@+id/menu_add_from_local"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:src="@drawable/ic_action_add"
                 fab:fab_size="mini"
-                fab:fab_label="设置壁纸"/>
+                fab:fab_label="本地导入"/>
+
+        <com.github.clans.fab.FloatingActionButton
+                android:id="@+id/menu_add_from_net"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/ic_action_add"
+                fab:fab_size="mini"
+                fab:fab_label="网络导入"/>
 
     </com.github.clans.fab.FloatingActionMenu>
 

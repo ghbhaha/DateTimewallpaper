@@ -19,11 +19,13 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+
         <activity
                 android:name=".ui.HomeActivity"
-                android:theme="@style/AppTheme.NoActionBar"
+                android:label="@string/title_activity_home"
+                android:launchMode="singleTask"
                 android:screenOrientation="portrait"
-                android:label="@string/title_activity_home">
+                android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
@@ -32,19 +34,24 @@
         </activity>
         <activity
                 android:name=".ui.SetViewActivity"
-                android:launchMode="singleTask"
                 android:screenOrientation="portrait"
                 android:theme="@style/AppTheme.Full">
         </activity>
         <activity
-                android:name=".about.AboutActivity"
+                android:name=".ui.about.AboutActivity"
                 android:screenOrientation="portrait"
                 android:theme="@style/AppTheme.MaterialAboutActivity"/>
         <activity
-                android:name=".about.LicenseActivity"
+                android:name=".ui.about.LicenseActivity"
                 android:screenOrientation="portrait"
                 android:theme="@style/AppTheme.MaterialAboutActivity"/>
-
+        <activity
+                android:name=".ui.SettingsActivity"
+                android:label="@string/title_activity_settings"
+                android:screenOrientation="portrait"/>
+        <activity android:name=".ui.WebActivity"
+                  android:label="@string/title_activity_import_net"
+                  android:screenOrientation="portrait"/>
         <service
                 android:name=".service.LiveWallPaperService"
                 android:permission="android.permission.BIND_WALLPAPER">

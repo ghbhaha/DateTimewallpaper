@@ -29,7 +29,7 @@ public class SharedPreferencesUtil {
 
     public static final String SP_CONFS = "SP_CONFS";
 
-    public static final String SP_HIDE_ACT = "hide_act";
+    public static final String SP_HIDE_ACT = "hide_from_recent";
 
 
     private SharedPreferences sp;
@@ -43,6 +43,16 @@ public class SharedPreferencesUtil {
     public SharedPreferencesUtil(Context context, Long paperId) {
         this.context = context;
         sp = context.getSharedPreferences(context.getPackageName() + ":" + paperId, Context.MODE_PRIVATE);
+    }
+
+    public SharedPreferencesUtil(Context context, String key) {
+        this.context = context;
+        sp = context.getSharedPreferences(key, Context.MODE_PRIVATE);
+    }
+
+
+    public static SharedPreferencesUtil getAppDefault(Context context){
+        return new SharedPreferencesUtil(context,context.getPackageName()+"_preferences");
     }
 
     /**
@@ -179,6 +189,19 @@ public class SharedPreferencesUtil {
             }
         }
         putData(SharedPreferencesUtil.SP_CONFS, JSON.toJSONString(wallPaperModels));
+    }
+
+    public void setWallPaperId(long paperId) {
+        sp.edit().putLong("last", paperId).apply();
+    }
+
+    public long getLastPaperId() {
+        long last = sp.getLong("last", -1L);
+        if (last == -1) {
+            List<WallPaperModel> wallPaperModels = getWallpapermodels();
+            last = wallPaperModels.get(0).getPaperId();
+        }
+        return last;
     }
 
     public long getNextWallPaper() {

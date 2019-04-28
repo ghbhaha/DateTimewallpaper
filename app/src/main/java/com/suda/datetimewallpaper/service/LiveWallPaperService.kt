@@ -33,13 +33,16 @@ class LiveWallPaperService : WallpaperService() {
         override fun onSurfaceCreated(holder: SurfaceHolder) {
             super.onSurfaceCreated(holder)
             val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
-            val wallPaperModels = sharedPreferencesUtil.wallpapermodels
-            dateTimeDrawer!!.init(holder, this@LiveWallPaperService, true, wallPaperModels[0].paperId)
+            dateTimeDrawer!!.init(holder, this@LiveWallPaperService, true, sharedPreferencesUtil.lastPaperId)
             Log.d("@@@@@", "onSurfaceCreated")
         }
 
         override fun onVisibilityChanged(visible: Boolean) {
             super.onVisibilityChanged(visible)
+            if (visible) {
+                val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
+                dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.lastPaperId, false)
+            }
             dateTimeDrawer!!.onVisibilityChanged(visible)
             Log.d("@@@@@", "onVisibilityChanged$visible")
         }
@@ -77,11 +80,12 @@ class LiveWallPaperService : WallpaperService() {
                 }
                 lastTime = event.downTime
                 if (clickTime % 3 == 0) {
-                    val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
-                    dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.nextWallPaper)
+                    if (SharedPreferencesUtil.getAppDefault(this@LiveWallPaperService).getData("click_change", true)) {
+                        val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
+                        dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.nextWallPaper)
+                    }
                 }
             }
-
         }
     }
 }

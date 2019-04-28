@@ -10,9 +10,9 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.example.zhouwei.library.CustomPopWindow
-import com.suda.datetimewallpaper.ui.SetViewActivity
 import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.bean.WallPaperModel
+import com.suda.datetimewallpaper.ui.SetViewActivity
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil
 import me.drakeet.materialdialog.MaterialDialog
 
@@ -93,7 +93,6 @@ class WallPaperModelAdapter(val wallpaperModels: MutableList<WallPaperModel>) :
         holder.cbModel.visibility = View.GONE
         holder.cbModel.isChecked = wallpaperModels[position].isCheck
     }
-
 }
 
 class WallPaperModelHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

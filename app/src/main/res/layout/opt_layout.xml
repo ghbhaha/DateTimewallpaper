@@ -18,7 +18,7 @@
                       android:layout_height="match_parent">
 
             <Button android:layout_width="wrap_content"
-                    android:text="修改参数"
+                    android:text="@string/set_wallpaper"
                     android:clickable="true"
                     android:id="@+id/edit_conf"
                     android:textSize="15sp"
@@ -28,7 +28,7 @@
                     android:layout_height="wrap_content"/>
 
             <Button android:layout_width="wrap_content"
-                    android:text="修改名字"
+                    android:text="@string/edit_name"
                     android:clickable="true"
                     android:id="@+id/edit_name"
                     android:textSize="15sp"
@@ -38,7 +38,7 @@
                     android:layout_height="wrap_content"/>
 
             <Button android:layout_width="wrap_content"
-                    android:text="删除"
+                    android:text="@string/delete"
                     android:clickable="true"
                     android:id="@+id/edit_delete"
                     android:textSize="15sp"

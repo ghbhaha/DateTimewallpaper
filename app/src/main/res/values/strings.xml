@@ -2,7 +2,7 @@
     <string name="app_name">时间轮盘</string>
     <string name="storage_permission">时间轮盘需要存储权限选择图片</string>
     <string name="num_format">大写数字</string>
-    <string name="hide_from_recent">最近任务隐藏</string>
+
     <string name="donate_zfb">打赏</string>
     <string name="vertical_pos">垂直位置</string>
     <string name="horizontal_pos">水平位置</string>
@@ -19,7 +19,7 @@
     <string name="select_conf">选择配置</string>
     <string name="select_conf_1">选择配置\'%s\'</string>
     <string name="select_conf_confirm">确认选择配置</string>
-    <string name="select_conf_default">恢复默认</string>
+    <string name="select_conf_default">默认配置</string>
     <string name="plz_enter_conf_url">请输入下载直链</string>
     <string name="import_s">导入</string>
     <string name="url_null_tip">请求不能为空</string>
@@ -48,9 +48,29 @@
     </plurals>
     <string name="title_activity_home">@string/app_name</string>
 
-    <string name="switch_conf_tip">连续点3次切换配置</string>
+    <string name="switch_conf_tip">桌面连续点3次切换配置</string>
+
+
+    <string name="settings">设置</string>
 
 
     <string name="navigation_drawer_open">Open</string>
     <string name="navigation_drawer_close">Close</string>
+    <string name="title_activity_settings">@string/settings</string>
+
+    <string name="title_activity_import_net">网络导入</string>
+
+
+    <string name="click_change">百变轮盘</string>
+    <string name="click_change_summary">通过三击桌面切换配置</string>
+
+    <string name="hide_from_recent">任务隐藏</string>
+    <string name="hide_from_recent_summary">在最近任务管理器中隐藏时间轮盘</string>
+
+    <string name="rotate_forever">永动模式</string>
+    <string name="rotate_forever_summary">轮盘将不停转动，可能会非常耗电</string>
+
+    <string name="edit_name">修改名字</string>
+    <string name="delete">删除</string>
+
 </resources>

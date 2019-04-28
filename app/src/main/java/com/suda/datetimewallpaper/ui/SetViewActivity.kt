@@ -62,11 +62,11 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
             } else {
                 View.VISIBLE
             }
-//            bt_set_wallpaper.visibility = if (bt_set_wallpaper.visibility == View.VISIBLE) {
-//                View.GONE
-//            } else {
-//                View.VISIBLE
-//            }
+            bt_set_wallpaper.visibility = if (bt_set_wallpaper.visibility == View.VISIBLE) {
+                View.GONE
+            } else {
+                View.VISIBLE
+            }
         }
 
         dtv.post {
@@ -184,6 +184,8 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
     }
 
     fun setWallPaper(view: View) {
+        val sp = SharedPreferencesUtil(this)
+        sp.setWallPaperId(paperId)
         WallpaperUtil.setLiveWallpaper(this, REQUEST_CODE_SET_WALLPAPER)
     }
 
@@ -361,25 +363,4 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
         }
     }
 
-    private fun setExcludeFromRecents(exclude: Boolean) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            try {
-                val service = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-                for (appTask in service.appTasks) {
-                    if (appTask.taskInfo.id == taskId) {
-                        appTask.setExcludeFromRecents(exclude)
-                    }
-                }
-            } catch (e: Exception) {
-            }
-
-        } else {
-            Toast.makeText(this, R.string.version_low, Toast.LENGTH_SHORT).show()
-        }
-    }
-
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
-    }
 }

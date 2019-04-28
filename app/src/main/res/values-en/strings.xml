@@ -43,4 +43,9 @@
         <item quantity="one">You can only select one media file</item>
         <item quantity="many">You can only select up to %1$d media files</item>
     </plurals>
+
+    <string name="edit_name">Change name</string>
+    <string name="delete">Delete</string>
+
+
 </resources>

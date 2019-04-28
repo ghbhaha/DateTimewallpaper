@@ -87,6 +87,8 @@ class DateTimeDrawer {
 
     private var cusTypeFace: Typeface? = null
 
+    private var rotateForever = false
+
     /**
      * 用于刷新农历
      */
@@ -131,7 +133,11 @@ class DateTimeDrawer {
             }
 
             //处理动画
-            val sd = currentTimeInMillis % 1000 / 500f
+            var sd = if (rotateForever) {
+                currentTimeInMillis % 1000 / 1000f
+            } else {
+                currentTimeInMillis % 1000 / 500f
+            }
 
             //静止时不再绘制，降低功耗
             if (secondDelta == 0f && sd >= 1 && !changeConf) {
@@ -352,16 +358,22 @@ class DateTimeDrawer {
         surfaceHolder = holder
     }
 
-    fun resetPaperId(paperId: Long) {
+    fun resetPaperId(paperId: Long, resetConf: Boolean = true) {
         this.sharedPreferencesUtil = SharedPreferencesUtil(context, paperId)
-        resetConf(true)
+        if (resetConf) {
+            resetConf(true)
+        }
     }
+
 
     /**
      * 重新配置
      */
     fun resetConf(force: Boolean) {
         start.set(false)
+
+        rotateForever = SharedPreferencesUtil.getAppDefault(context).getData("rotate_forever", false)
+
         verticalPos = sharedPreferencesUtil?.getData(SP_VERTICAL_POS, 0.5f) as Float
         horizontalPos = sharedPreferencesUtil?.getData(SP_HORIZONTAL_POS, 0.5f) as Float
         rotate = sharedPreferencesUtil?.getData(SP_ROTATE, 0f) as Float
