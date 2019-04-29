@@ -1,11 +1,15 @@
 package com.suda.datetimewallpaper.view
 
+import android.animation.PropertyValuesHolder
+import android.animation.TimeInterpolator
+import android.animation.ValueAnimator
 import android.app.Service
 import android.content.Context
 import android.graphics.*
 import android.media.ExifInterface
 import android.os.Build
 import android.text.TextUtils
+import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.widget.Toast
 import androidx.collection.ArrayMap
@@ -40,7 +44,7 @@ class DateTimeDrawer {
     private val centerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var surfaceHolder: SurfaceHolder? = null
-    private val matrix = Matrix()
+    private val textMatrix = Matrix()
     private val bgMatrix = Matrix()
 
     private val scheduledThreadPool = Executors.newScheduledThreadPool(1)
@@ -88,6 +92,7 @@ class DateTimeDrawer {
     private var cusTypeFace: Typeface? = null
 
     private var rotateForever = false
+    private var perspectiveMode = false
 
     /**
      * 用于刷新农历
@@ -99,6 +104,17 @@ class DateTimeDrawer {
     private val simpleDateFormatMap = ArrayMap<String, SimpleDateFormat>()
 
     private var sharedPreferencesUtil: SharedPreferencesUtil? = null
+
+    private val camera: Camera by lazy {
+        Camera()
+    }
+    private val cameraMatrix = Matrix()
+    private var mShakeAnim: ValueAnimator? = null
+    private val mMaxCameraRotate = 20f
+    /* camera绕X轴旋转的角度 */
+    private var mCameraRotateX: Float = 0f
+    /* camera绕Y轴旋转的角度 */
+    private var mCameraRotateY: Float = 0f
 
     private val refreshTask = object : TimerTask() {
         override fun run() {
@@ -148,7 +164,7 @@ class DateTimeDrawer {
             if (sd >= 1f) {
                 secondDelta = 1f
             }
-            secondDelta = secondDelta - 1
+            secondDelta -= 1
             if (start.get()) {
                 onDraw()
             }
@@ -172,8 +188,11 @@ class DateTimeDrawer {
             } else {
                 canvas.drawColor(bgColor)
             }
-            drawCenter(canvas)
-            drawCircle(canvas)
+
+            val matrix = Matrix(cameraMatrix)
+
+            drawCenter(canvas, matrix)
+            drawCircle(canvas, matrix)
         } catch (e: Exception) {
             e.printStackTrace()
         } finally {
@@ -183,7 +202,7 @@ class DateTimeDrawer {
         }
     }
 
-    private fun drawCenter(canvas: Canvas?) {
+    private fun drawCenter(canvas: Canvas, cameraMatrix: Matrix) {
         centerPaint.textSize = drawBean!!.centerTextSize * 1.0f / drawBean!!.centerText.size
         centerPaint.color = textColor
         val fontMetrics = centerPaint.fontMetrics
@@ -217,12 +236,13 @@ class DateTimeDrawer {
 
                 centerPaint.typeface = if (textBean.useCusFont == 1) cusTypeFace else null
                 val strLength = centerPaint.measureText(centerText)
-                matrix.reset()
-                matrix.postTranslate(canvas!!.width * horizontalPos, canvas.height * verticalPos)
-                matrix.postTranslate(-strLength / 2, 0f)
-                matrix.postRotate(rotate * 360, canvas.width * horizontalPos, canvas.height * verticalPos)
-                matrix.postScale(this.scale, this.scale, canvas.width * horizontalPos, canvas.height * verticalPos)
-                canvas.matrix = matrix
+                textMatrix.reset()
+                textMatrix.postTranslate(canvas!!.width * horizontalPos, canvas.height * verticalPos)
+                textMatrix.postTranslate(-strLength / 2, 0f)
+                textMatrix.postRotate(rotate * 360, canvas.width * horizontalPos, canvas.height * verticalPos)
+                textMatrix.postScale(this.scale, this.scale, canvas.width * horizontalPos, canvas.height * verticalPos)
+                canvas.matrix = cameraMatrix
+                canvas.concat(textMatrix)
                 val h = i * halfTextHeight - halfTextHeight / 2 * (drawBean!!.centerText.size - 1)
                 val baseline = (h - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent
                 centerPaint.isFakeBoldText = textBean.bold == 1
@@ -234,7 +254,7 @@ class DateTimeDrawer {
     /**
      * @param canvas
      */
-    private fun drawCircle(canvas: Canvas?) {
+    private fun drawCircle(canvas: Canvas, cameraMatrix: Matrix) {
         drawBean!!.circleText.forEach {
             val index = getIndex(it)
             clockPaint.isFakeBoldText = it.bold == 1
@@ -243,8 +263,6 @@ class DateTimeDrawer {
                 val fontMetrics = clockPaint.fontMetrics
                 circleBaseline = (0 - (fontMetrics.descent - fontMetrics.ascent)) / 2 - fontMetrics.ascent
             }
-            val width = canvas!!.width
-            val height = canvas.height
             val addD = 360f / it.array.size
 
             textBeans.clear()
@@ -263,12 +281,13 @@ class DateTimeDrawer {
             }
 
             textBeans.forEachIndexed { i, str ->
-                matrix.reset()
-                matrix.postTranslate(width * horizontalPos, height * verticalPos)
-                matrix.postTranslate(it.dis, 0f)
-                matrix.postRotate(degree + rotate * 360, width * horizontalPos, height * verticalPos)
-                matrix.postScale(this.scale, this.scale, width * horizontalPos, height * verticalPos)
-                canvas.matrix = matrix
+                textMatrix.reset()
+                textMatrix.postTranslate(surfaceWidth * horizontalPos, surfaceHeight * verticalPos)
+                textMatrix.postTranslate(it.dis, 0f)
+                textMatrix.postRotate(degree + rotate * 360, surfaceWidth * horizontalPos, surfaceHeight * verticalPos)
+                textMatrix.postScale(this.scale, this.scale, surfaceWidth * horizontalPos, surfaceHeight * verticalPos)
+                canvas.matrix = cameraMatrix
+                canvas.concat(textMatrix)
                 if ("text" == it.type) {
                     clockPaint.color = textColor
                 } else {
@@ -356,6 +375,7 @@ class DateTimeDrawer {
         clockPaint.isDither = true
         this.context = context
         surfaceHolder = holder
+
     }
 
     fun resetPaperId(paperId: Long, resetConf: Boolean = true) {
@@ -373,6 +393,8 @@ class DateTimeDrawer {
         start.set(false)
 
         rotateForever = SharedPreferencesUtil.getAppDefault(context).getData("rotate_forever", false)
+        perspectiveMode  = SharedPreferencesUtil.getAppDefault(context).getData("perspective_mode", false)
+
 
         verticalPos = sharedPreferencesUtil?.getData(SP_VERTICAL_POS, 0.5f) as Float
         horizontalPos = sharedPreferencesUtil?.getData(SP_HORIZONTAL_POS, 0.5f) as Float
@@ -526,16 +548,15 @@ class DateTimeDrawer {
             return
         }
         if (visible) {
+            cameraMatrix.reset()
             scheduledFuture =
                 scheduledThreadPool.scheduleAtFixedRate(refreshTask, 0, schedule.toLong(), TimeUnit.MILLISECONDS)
             resetConf(true)
         } else {
-            if (scheduledFuture != null) {
-                scheduledFuture!!.cancel(true)
-                if (context !is Service) {
-                    bgImg = ""
-                    bgBitmap = null
-                }
+            scheduledFuture?.cancel(true)
+            if (context !is Service) {
+                bgImg = ""
+                bgBitmap = null
             }
             System.gc()
         }
@@ -546,5 +567,96 @@ class DateTimeDrawer {
         surfaceHeight = height
         bgImg = ""
         setBg()
+    }
+
+
+    //////////////////////////////////////////
+
+    /**
+     * 获取camera旋转的大小
+     *
+     * @param event motionEvent
+     */
+    fun resetCameraRotate(event: MotionEvent) {
+        if (!perspectiveMode){
+            return
+        }
+        mShakeAnim?.cancel()
+        mShakeAnim = null
+        val rotateX = -(event.y - surfaceHeight * verticalPos);
+        val rotateY = (event.x - surfaceWidth * horizontalPos);
+        //求出此时旋转的大小与半径之比
+        val percentArr = getPercent(rotateX, rotateY);
+        //最终旋转的大小按比例匀称改变
+        mCameraRotateX = percentArr[0] * mMaxCameraRotate;
+        mCameraRotateY = percentArr[1] * mMaxCameraRotate;
+        resetCameraMatrix()
+    }
+
+    private fun resetCameraMatrix() {
+        camera.save();
+        cameraMatrix.reset()
+        camera.rotateX(mCameraRotateX)
+        camera.rotateY(mCameraRotateY);
+        camera.getMatrix(cameraMatrix)
+        cameraMatrix.preTranslate(-surfaceWidth * horizontalPos, -surfaceHeight * verticalPos);
+        cameraMatrix.postTranslate(surfaceWidth * horizontalPos, surfaceHeight * verticalPos);
+        camera.restore();
+        changeConf = true
+    }
+
+    /**
+     * 时钟晃动动画
+     */
+    fun startShakeAnim() {
+
+        mShakeAnim?.cancel()
+        val cameraRotateXName = "cameraRotateX"
+        val cameraRotateYName = "cameraRotateY"
+
+        val cameraRotateXHolder = PropertyValuesHolder.ofFloat(cameraRotateXName, mCameraRotateX, 0f)
+        val cameraRotateYHolder = PropertyValuesHolder.ofFloat(cameraRotateYName, mCameraRotateY, 0f)
+
+        mShakeAnim = ValueAnimator.ofPropertyValuesHolder(
+            cameraRotateXHolder,
+            cameraRotateYHolder
+        )
+        mShakeAnim?.interpolator = object : TimeInterpolator {
+            override fun getInterpolation(input: Float): Float {
+                //http://inloop.github.io/interpolator/
+                val f = 0.571429f
+                return (Math.pow(
+                    2.0,
+                    (-2 * input).toDouble()
+                ) * Math.sin((input - f / 4) * (2 * Math.PI) / f) + 1).toFloat()
+            }
+        }
+        mShakeAnim?.duration = 500
+        mShakeAnim?.addUpdateListener { animation ->
+            mCameraRotateX = animation.getAnimatedValue(cameraRotateXName) as Float
+            mCameraRotateY = animation.getAnimatedValue(cameraRotateYName) as Float
+            resetCameraMatrix()
+        }
+        mShakeAnim?.start()
+    }
+
+    private fun getPercent(x: Float, y: Float): FloatArray {
+        val percentArr = FloatArray(2)
+        var percentX = x / surfaceWidth
+        var percentY = y / surfaceWidth
+        //处理一下比例值
+        if (percentX > 1) {
+            percentX = 1f
+        } else if (percentX < -1) {
+            percentX = -1f
+        }
+        if (percentY > 1) {
+            percentY = 1f
+        } else if (percentY < -1) {
+            percentY = -1f
+        }
+        percentArr[0] = percentX
+        percentArr[1] = percentY
+        return percentArr
     }
 }

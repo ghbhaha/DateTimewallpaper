@@ -2,6 +2,7 @@ package com.suda.datetimewallpaper.view;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
@@ -40,6 +41,17 @@ final public class DateTimeView extends SurfaceView implements SurfaceHolder.Cal
     public void surfaceCreated(SurfaceHolder holder) {
         dateTimeDrawer.onSurfaceChange(getWidth(), getHeight());
         dateTimeDrawer.onVisibilityChanged(true);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        if (event.getAction() == MotionEvent.ACTION_DOWN || event.getAction() == MotionEvent.ACTION_MOVE) {
+            dateTimeDrawer.resetCameraRotate(event);
+        } else if (event.getAction() == MotionEvent.ACTION_UP) {
+            dateTimeDrawer.resetCameraRotate(event);
+            dateTimeDrawer.startShakeAnim();
+        }
+        return super.onTouchEvent(event);
     }
 
     @Override

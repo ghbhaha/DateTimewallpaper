@@ -70,6 +70,9 @@
     <string name="rotate_forever">永动模式</string>
     <string name="rotate_forever_summary">轮盘将不停转动，可能会非常耗电</string>
 
+    <string name="perspective_mode">透视模式</string>
+    <string name="perspective_mode_summary">点击屏幕产生透视效果</string>
+
     <string name="edit_name">修改名字</string>
     <string name="delete">删除</string>
 

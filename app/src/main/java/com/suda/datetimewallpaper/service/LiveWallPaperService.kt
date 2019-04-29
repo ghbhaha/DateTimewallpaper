@@ -73,6 +73,7 @@ class LiveWallPaperService : WallpaperService() {
         override fun onTouchEvent(event: MotionEvent) {
             super.onTouchEvent(event)
             if (event.action == MotionEvent.ACTION_DOWN) {
+                dateTimeDrawer!!.resetCameraRotate(event)
                 if (event.downTime - lastTime > 200) {
                     clickTime = 1
                 } else {
@@ -85,6 +86,11 @@ class LiveWallPaperService : WallpaperService() {
                         dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.nextWallPaper)
                     }
                 }
+            } else if (event.action == MotionEvent.ACTION_MOVE) {
+                dateTimeDrawer!!.resetCameraRotate(event)
+            } else if (event.action == MotionEvent.ACTION_UP) {
+                dateTimeDrawer!!.resetCameraRotate(event)
+                dateTimeDrawer!!.startShakeAnim()
             }
         }
     }

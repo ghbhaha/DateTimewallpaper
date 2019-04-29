@@ -16,6 +16,7 @@ import com.suda.datetimewallpaper.BuildConfig
 import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.base.BaseAboutActivity
 import com.suda.datetimewallpaper.util.CheckUpdateUtil
+import java.lang.Exception
 
 
 /**
@@ -23,13 +24,6 @@ import com.suda.datetimewallpaper.util.CheckUpdateUtil
  * @date 2019/4/15
  */
 class AboutActivity : BaseAboutActivity() {
-
-    override fun onCreate(savedInstanceState: Bundle?, persistentState: PersistableBundle?) {
-        super.onCreate(savedInstanceState, persistentState)
-        val upArrow = resources.getDrawable(R.drawable.abc_ic_ab_back_material);
-        upArrow.setColorFilter(resources.getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
-        supportActionBar?.setHomeAsUpIndicator(upArrow);
-    }
 
     override fun getMaterialAboutList(context: Context): MaterialAboutList {
 

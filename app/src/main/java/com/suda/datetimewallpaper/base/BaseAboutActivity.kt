@@ -5,6 +5,7 @@ import android.os.Bundle
 import com.danielstone.materialaboutlibrary.MaterialAboutActivity
 import com.suda.datetimewallpaper.R
 import com.umeng.analytics.MobclickAgent
+import java.lang.Exception
 
 /**
  * @author guhaibo
@@ -13,9 +14,13 @@ import com.umeng.analytics.MobclickAgent
 abstract class BaseAboutActivity : MaterialAboutActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val upArrow = resources.getDrawable(R.drawable.abc_ic_ab_back_material);
-        upArrow.setColorFilter(resources.getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
-        supportActionBar?.setHomeAsUpIndicator(upArrow);
+        try {
+            val upArrow = resources.getDrawable(R.drawable.abc_ic_ab_back_material);
+            upArrow.setColorFilter(resources.getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
+            supportActionBar?.setHomeAsUpIndicator(upArrow);
+
+        }catch (e: Exception){
+        }
     }
 
     override fun onResume() {
