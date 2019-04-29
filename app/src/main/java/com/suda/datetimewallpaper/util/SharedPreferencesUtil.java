@@ -146,6 +146,7 @@ public class SharedPreferencesUtil {
             _0sp.putData(SP_VERTICAL_POS, _def_sp.getData(SP_VERTICAL_POS, 0.5f));
             _0sp.putData(SP_HORIZONTAL_POS, _def_sp.getData(SP_HORIZONTAL_POS, 0.5f));
             _0sp.putData(SP_ROTATE, _def_sp.getData(SP_ROTATE, 0f));
+            _0sp.putData(SP_SCALE, _def_sp.getData(SP_SCALE, 0.25f));
             _0sp.putData(SP_TEXT_COLOR_DARK, _def_sp.getData(SP_TEXT_COLOR_DARK, Color.GRAY));
             _0sp.putData(SP_TEXT_COLOR, _def_sp.getData(SP_TEXT_COLOR, Color.WHITE));
             _0sp.putData(SP_BG_COLOR, _def_sp.getData(SP_BG_COLOR, Color.BLACK));
