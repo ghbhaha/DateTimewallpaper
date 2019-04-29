@@ -22,7 +22,7 @@ class LiveWallPaperService : WallpaperService() {
         return LiveWallpaperEngine()
     }
 
-    private inner class LiveWallpaperEngine : WallpaperService.Engine(), SensorEventListener {
+    private inner class LiveWallpaperEngine : WallpaperService.Engine() {
 
         private var dateTimeDrawer: DateTimeDrawer? = null
 
@@ -66,6 +66,57 @@ class LiveWallPaperService : WallpaperService() {
 
         }
 
+        val accelerometerListener = object : SensorEventListener {
+            private val SPEED_SHRESHOLD = 4000
+            // 两次检测的时间间隔
+            private val UPTATE_INTERVAL_TIME = 50
+            private var lastUpdateTime: Long = 0
+            private var lastX: Float = 0.toFloat()
+            private var lastY: Float = 0.toFloat()
+            private var lastZ: Float = 0.toFloat()
+            private var isShaking = false
+
+            override fun onSensorChanged(event: SensorEvent?) {
+                event?.run {
+                    // 现在检测时间
+                    val currentUpdateTime = System.currentTimeMillis()
+                    // 两次检测的时间间隔
+                    val timeInterval = currentUpdateTime - lastUpdateTime
+                    // 判断是否达到了检测时间间隔
+                    if (isShaking || timeInterval < UPTATE_INTERVAL_TIME) return
+                    // 现在的时间变成last时间
+                    lastUpdateTime = currentUpdateTime
+                    // 获得x,y,z坐标
+                    val x = event.values[0]
+                    val y = event.values[1]
+                    val z = event.values[2]
+                    // 获得x,y,z的变化值
+                    val deltaX = x - lastX
+                    val deltaY = y - lastY
+                    val deltaZ = z - lastZ
+                    // 将现在的坐标变成last坐标
+                    lastX = x
+                    lastY = y
+                    lastZ = z
+                    val speed =
+                        Math.sqrt((deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ).toDouble()) / timeInterval * 10000
+                    // 达到速度阀值，发出提示
+                    if (speed >= SPEED_SHRESHOLD) {
+                        isShaking = true
+                        Handler().postDelayed({
+                            isShaking = false
+                        }, 500)
+                        val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
+                        dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.nextWallPaper)
+                    }
+                }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+            }
+        }
+
         override fun onCreate(surfaceHolder: SurfaceHolder) {
             super.onCreate(surfaceHolder)
             dateTimeDrawer = DateTimeDrawer()
@@ -84,15 +135,15 @@ class LiveWallPaperService : WallpaperService() {
             if (visible) {
                 val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
                 dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.lastPaperId, false)
-                if (SharedPreferencesUtil.getAppDefault(this@LiveWallPaperService).getData("shake_change", true)) {
+                if (SharedPreferencesUtil.getAppDefault(this@LiveWallPaperService).getData("shake_change", false)) {
                     val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
                     accelerometerSensor?.run {
-                        sensorManager.registerListener(this@LiveWallpaperEngine, this, SensorManager.SENSOR_DELAY_UI)
+                        sensorManager.registerListener(accelerometerListener, this, SensorManager.SENSOR_DELAY_UI)
                     }
                 }
                 if (SharedPreferencesUtil.getAppDefault(this@LiveWallPaperService).getData(
                         "perspective_mode_sensor",
-                        true
+                        false
                     )
                 ) {
                     val rotateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
@@ -101,7 +152,7 @@ class LiveWallPaperService : WallpaperService() {
                     }
                 }
             } else {
-                sensorManager.unregisterListener(this@LiveWallpaperEngine)
+                sensorManager.unregisterListener(accelerometerListener)
                 sensorManager.unregisterListener(rvListener)
             }
             dateTimeDrawer!!.onVisibilityChanged(visible)
@@ -154,57 +205,5 @@ class LiveWallPaperService : WallpaperService() {
                 dateTimeDrawer!!.startShakeAnim()
             }
         }
-
-        ////////////////////////////////////////////////////////////////////////
-
-        private val SPEED_SHRESHOLD = 4000
-        // 两次检测的时间间隔
-        private val UPTATE_INTERVAL_TIME = 50
-        private var lastUpdateTime: Long = 0
-        private var lastX: Float = 0.toFloat()
-        private var lastY: Float = 0.toFloat()
-        private var lastZ: Float = 0.toFloat()
-        private var isShaking = false
-
-        override fun onSensorChanged(event: SensorEvent?) {
-            event?.run {
-                // 现在检测时间
-                val currentUpdateTime = System.currentTimeMillis()
-                // 两次检测的时间间隔
-                val timeInterval = currentUpdateTime - lastUpdateTime
-                // 判断是否达到了检测时间间隔
-                if (isShaking || timeInterval < UPTATE_INTERVAL_TIME) return
-                // 现在的时间变成last时间
-                lastUpdateTime = currentUpdateTime
-                // 获得x,y,z坐标
-                val x = event.values[0]
-                val y = event.values[1]
-                val z = event.values[2]
-                // 获得x,y,z的变化值
-                val deltaX = x - lastX
-                val deltaY = y - lastY
-                val deltaZ = z - lastZ
-                // 将现在的坐标变成last坐标
-                lastX = x
-                lastY = y
-                lastZ = z
-                val speed =
-                    Math.sqrt((deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ).toDouble()) / timeInterval * 10000
-                // 达到速度阀值，发出提示
-                if (speed >= SPEED_SHRESHOLD) {
-                    isShaking = true
-                    Handler().postDelayed({
-                        isShaking = false
-                    }, 500)
-                    val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
-                    dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.nextWallPaper)
-                }
-            }
-        }
-
-        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-
-        }
-
     }
 }
