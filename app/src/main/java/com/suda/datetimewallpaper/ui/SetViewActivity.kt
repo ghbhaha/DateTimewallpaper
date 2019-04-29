@@ -286,19 +286,21 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
             val listView = viewGroup.findViewById<ListView>(R.id.conf_list)
             val restoreAdapter = CusAdapter()
             listView.onItemLongClickListener = AdapterView.OnItemLongClickListener { parent, view, position, id ->
-                val file = restoreAdapter.getItem(position) as File
-                val outDialog = MaterialDialog(this@SetViewActivity)
-                outDialog.setTitle(R.string.select_conf)
-                outDialog.setMessage(String.format(getString(R.string.delete_conf), file.name))
-                outDialog.setCanceledOnTouchOutside(true)
-                outDialog.setNegativeButton(R.string.cancel) { outDialog.dismiss() }
+                restoreAdapter.getItem(position)?.run {
+                    val file = this as File
+                    val outDialog = MaterialDialog(this@SetViewActivity)
+                    outDialog.setTitle(R.string.select_conf)
+                    outDialog.setMessage(String.format(getString(R.string.delete_conf), file.name))
+                    outDialog.setCanceledOnTouchOutside(true)
+                    outDialog.setNegativeButton(R.string.cancel) { outDialog.dismiss() }
 
-                outDialog.setPositiveButton(R.string.yes) {
-                    file.delete()
-                    restoreAdapter.refresh()
-                    outDialog.dismiss()
+                    outDialog.setPositiveButton(R.string.yes) {
+                        file.delete()
+                        restoreAdapter.refresh()
+                        outDialog.dismiss()
+                    }
+                    outDialog.show()
                 }
-                outDialog.show()
                 true
             }
             listView.onItemClickListener = AdapterView.OnItemClickListener { parent, view, position, id ->
