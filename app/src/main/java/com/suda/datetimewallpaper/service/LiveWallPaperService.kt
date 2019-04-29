@@ -33,6 +33,39 @@ class LiveWallPaperService : WallpaperService() {
             getSystemService(SENSOR_SERVICE) as SensorManager
         }
 
+        val rvListener = object : SensorEventListener {
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+            }
+
+            override fun onSensorChanged(event: SensorEvent?) {
+                event?.run {
+                    val rotationMatrix = FloatArray(16)
+                    SensorManager.getRotationMatrixFromVector(
+                        rotationMatrix, this.values
+                    )
+                    // Remap coordinate system
+                    val remappedRotationMatrix = FloatArray(16)
+                    SensorManager.remapCoordinateSystem(
+                        rotationMatrix,
+                        SensorManager.AXIS_X,
+                        SensorManager.AXIS_Z,
+                        remappedRotationMatrix
+                    )
+
+                    // Convert to orientations
+                    val orientations = FloatArray(3)
+                    SensorManager.getOrientation(rotationMatrix, orientations)
+                    for (i in 0..2) {
+                        orientations[i] = Math.toDegrees(orientations[i].toDouble()).toFloat()
+                    }
+                    dateTimeDrawer?.resetCameraMatrix(orientations[1], orientations[2], 0f)
+
+                }
+            }
+
+        }
+
         override fun onCreate(surfaceHolder: SurfaceHolder) {
             super.onCreate(surfaceHolder)
             dateTimeDrawer = DateTimeDrawer()
@@ -51,14 +84,25 @@ class LiveWallPaperService : WallpaperService() {
             if (visible) {
                 val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
                 dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.lastPaperId, false)
-                val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
                 if (SharedPreferencesUtil.getAppDefault(this@LiveWallPaperService).getData("shake_change", true)) {
+                    val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
                     accelerometerSensor?.run {
                         sensorManager.registerListener(this@LiveWallpaperEngine, this, SensorManager.SENSOR_DELAY_UI)
                     }
                 }
+                if (SharedPreferencesUtil.getAppDefault(this@LiveWallPaperService).getData(
+                        "perspective_mode_sensor",
+                        true
+                    )
+                ) {
+                    val rotateSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+                    rotateSensor?.run {
+                        sensorManager.registerListener(rvListener, this, SensorManager.SENSOR_DELAY_UI)
+                    }
+                }
             } else {
                 sensorManager.unregisterListener(this@LiveWallpaperEngine)
+                sensorManager.unregisterListener(rvListener)
             }
             dateTimeDrawer!!.onVisibilityChanged(visible)
             Log.d("@@@@@", "onVisibilityChanged$visible")

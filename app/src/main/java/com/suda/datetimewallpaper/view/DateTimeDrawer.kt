@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicBoolean
 
 /**
@@ -104,6 +103,9 @@ class DateTimeDrawer {
     private val simpleDateFormatMap = ArrayMap<String, SimpleDateFormat>()
 
     private var sharedPreferencesUtil: SharedPreferencesUtil? = null
+
+    private var loopAnimator: ValueAnimator? = null
+
 
     private val camera: Camera by lazy {
         Camera()
@@ -549,11 +551,24 @@ class DateTimeDrawer {
         }
         if (visible) {
             cameraMatrix.reset()
-            scheduledFuture =
-                scheduledThreadPool.scheduleAtFixedRate(refreshTask, 0, schedule.toLong(), TimeUnit.MILLISECONDS)
+//            scheduledFuture =
+//                scheduledThreadPool.scheduleAtFixedRate(refreshTask, 0, schedule.toLong(), TimeUnit.MILLISECONDS)
+
+            loopAnimator = ValueAnimator.ofInt(0, 1000)
+            loopAnimator?.duration = 1000
+            loopAnimator?.repeatCount = ValueAnimator.INFINITE
+            loopAnimator?.addUpdateListener {
+                refreshTask.run()
+            }
+            loopAnimator?.start()
             resetConf(true)
         } else {
-            scheduledFuture?.cancel(true)
+
+            loopAnimator?.cancel()
+            loopAnimator = null
+
+//            scheduledFuture?.cancel(true)
+
             if (context !is Service) {
                 bgImg = ""
                 bgBitmap = null
@@ -571,6 +586,7 @@ class DateTimeDrawer {
 
 
     //////////////////////////////////////////
+
 
     /**
      * 获取camera旋转的大小
@@ -598,6 +614,19 @@ class DateTimeDrawer {
         cameraMatrix.reset()
         camera.rotateX(mCameraRotateX)
         camera.rotateY(mCameraRotateY);
+        camera.getMatrix(cameraMatrix)
+        cameraMatrix.preTranslate(-surfaceWidth * horizontalPos, -surfaceHeight * verticalPos);
+        cameraMatrix.postTranslate(surfaceWidth * horizontalPos, surfaceHeight * verticalPos);
+        camera.restore();
+        changeConf = true
+    }
+
+    fun resetCameraMatrix(mCameraRotateX: Float, mCameraRotateY: Float, mCameraRotateZ: Float) {
+        camera.save();
+        cameraMatrix.reset()
+        camera.rotateX(mCameraRotateX)
+        camera.rotateY(mCameraRotateY);
+        camera.rotateZ(mCameraRotateZ);
         camera.getMatrix(cameraMatrix)
         cameraMatrix.preTranslate(-surfaceWidth * horizontalPos, -surfaceHeight * verticalPos);
         cameraMatrix.postTranslate(surfaceWidth * horizontalPos, surfaceHeight * verticalPos);
