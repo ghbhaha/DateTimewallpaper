@@ -1,5 +1,10 @@
 package com.suda.datetimewallpaper.service
 
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
+import android.os.Handler
 import android.service.wallpaper.WallpaperService
 import android.util.Log
 import android.view.MotionEvent
@@ -17,12 +22,16 @@ class LiveWallPaperService : WallpaperService() {
         return LiveWallpaperEngine()
     }
 
-    private inner class LiveWallpaperEngine : WallpaperService.Engine() {
+    private inner class LiveWallpaperEngine : WallpaperService.Engine(), SensorEventListener {
 
         private var dateTimeDrawer: DateTimeDrawer? = null
 
-        internal var clickTime = 0
-        internal var lastTime = System.currentTimeMillis()
+        private var clickTime = 0
+        private var lastTime = System.currentTimeMillis()
+
+        private val sensorManager by lazy {
+            getSystemService(SENSOR_SERVICE) as SensorManager
+        }
 
         override fun onCreate(surfaceHolder: SurfaceHolder) {
             super.onCreate(surfaceHolder)
@@ -42,6 +51,14 @@ class LiveWallPaperService : WallpaperService() {
             if (visible) {
                 val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
                 dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.lastPaperId, false)
+                val accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+                if (SharedPreferencesUtil.getAppDefault(this@LiveWallPaperService).getData("shake_change", true)) {
+                    accelerometerSensor?.run {
+                        sensorManager.registerListener(this@LiveWallpaperEngine, this, SensorManager.SENSOR_DELAY_UI)
+                    }
+                }
+            } else {
+                sensorManager.unregisterListener(this@LiveWallpaperEngine)
             }
             dateTimeDrawer!!.onVisibilityChanged(visible)
             Log.d("@@@@@", "onVisibilityChanged$visible")
@@ -93,5 +110,57 @@ class LiveWallPaperService : WallpaperService() {
                 dateTimeDrawer!!.startShakeAnim()
             }
         }
+
+        ////////////////////////////////////////////////////////////////////////
+
+        private val SPEED_SHRESHOLD = 4000
+        // 两次检测的时间间隔
+        private val UPTATE_INTERVAL_TIME = 50
+        private var lastUpdateTime: Long = 0
+        private var lastX: Float = 0.toFloat()
+        private var lastY: Float = 0.toFloat()
+        private var lastZ: Float = 0.toFloat()
+        private var isShaking = false
+
+        override fun onSensorChanged(event: SensorEvent?) {
+            event?.run {
+                // 现在检测时间
+                val currentUpdateTime = System.currentTimeMillis()
+                // 两次检测的时间间隔
+                val timeInterval = currentUpdateTime - lastUpdateTime
+                // 判断是否达到了检测时间间隔
+                if (isShaking || timeInterval < UPTATE_INTERVAL_TIME) return
+                // 现在的时间变成last时间
+                lastUpdateTime = currentUpdateTime
+                // 获得x,y,z坐标
+                val x = event.values[0]
+                val y = event.values[1]
+                val z = event.values[2]
+                // 获得x,y,z的变化值
+                val deltaX = x - lastX
+                val deltaY = y - lastY
+                val deltaZ = z - lastZ
+                // 将现在的坐标变成last坐标
+                lastX = x
+                lastY = y
+                lastZ = z
+                val speed =
+                    Math.sqrt((deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ).toDouble()) / timeInterval * 10000
+                // 达到速度阀值，发出提示
+                if (speed >= SPEED_SHRESHOLD) {
+                    isShaking = true
+                    Handler().postDelayed({
+                        isShaking = false
+                    }, 500)
+                    val sharedPreferencesUtil = SharedPreferencesUtil(this@LiveWallPaperService)
+                    dateTimeDrawer!!.resetPaperId(sharedPreferencesUtil.nextWallPaper)
+                }
+            }
+        }
+
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
+
+        }
+
     }
 }

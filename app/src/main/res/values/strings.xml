@@ -52,6 +52,7 @@
 
 
     <string name="settings">设置</string>
+    <string name="other_settings">其他设置</string>
 
 
     <string name="navigation_drawer_open">Open</string>
@@ -61,8 +62,13 @@
     <string name="title_activity_import_net">网络导入</string>
 
 
-    <string name="click_change">百变轮盘</string>
+    <string name="variety_conf">百变轮盘</string>
+
+    <string name="click_change">三击切换</string>
     <string name="click_change_summary">通过三击桌面切换配置</string>
+
+    <string name="shake_change">晃动切换</string>
+    <string name="shake_change_summary">晃动切换手机切换配置</string>
 
     <string name="hide_from_recent">任务隐藏</string>
     <string name="hide_from_recent_summary">在最近任务管理器中隐藏时间轮盘</string>
