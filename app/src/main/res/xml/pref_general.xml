@@ -1,0 +1,66 @@
+<PreferenceScreen
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout="@layout/preference_item">
+
+    <PreferenceCategory
+            android:layout="@layout/preference_category_widget"
+            android:title="@string/variety_conf">
+        <SwitchPreference
+                android:key="click_change"
+                android:layout="@layout/preference_item"
+                android:title="@string/click_change"
+                android:summary="@string/click_change_summary"
+                android:defaultValue="true"/>
+
+        <SwitchPreference
+                android:key="shake_change"
+                android:layout="@layout/preference_item"
+                android:title="@string/shake_change"
+                android:summary="@string/shake_change_summary"
+                android:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:layout="@layout/preference_category_widget"
+            android:title="@string/perspective_mode">
+
+        <SwitchPreference
+                android:key="perspective_mode"
+                android:layout="@layout/preference_item"
+                android:title="@string/perspective_mode_manual"
+                android:summary="@string/perspective_mode_manual_summary"
+                android:defaultValue="false"/>
+
+        <SwitchPreference
+                android:key="perspective_mode_sensor"
+                android:layout="@layout/preference_item"
+                android:title="@string/perspective_mode_sensor"
+                android:summary="@string/perspective_mode_sensor_summary"
+                android:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+            android:layout="@layout/preference_category_widget"
+            android:title="@string/other_settings">
+
+        <SwitchPreference
+                android:key="rotate_forever"
+                android:layout="@layout/preference_item"
+                android:title="@string/rotate_forever"
+                android:summary="@string/rotate_forever_summary"
+                android:defaultValue="false"/>
+
+        <SwitchPreference
+                android:key="hide_from_recent"
+                android:layout="@layout/preference_item"
+                android:title="@string/hide_from_recent"
+                android:summary="@string/hide_from_recent_summary"
+                android:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+
+</PreferenceScreen>
