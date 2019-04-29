@@ -622,6 +622,7 @@ class DateTimeDrawer {
     }
 
     fun resetCameraMatrix(mCameraRotateX: Float, mCameraRotateY: Float, mCameraRotateZ: Float) {
+        mShakeAnim?.cancel()
         camera.save();
         cameraMatrix.reset()
         camera.rotateX(mCameraRotateX)
