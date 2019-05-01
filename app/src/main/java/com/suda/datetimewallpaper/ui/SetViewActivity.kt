@@ -2,12 +2,9 @@ package com.suda.datetimewallpaper.ui
 
 import android.Manifest
 import android.app.Activity
-import android.app.ActivityManager
-import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.text.TextUtils
 import android.view.LayoutInflater
@@ -76,14 +73,14 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
         panel.setOnTouchListener { _, _ -> true }
 
         setProgress(R.id.vertical_margin, SP_VERTICAL_POS, 0.5f)
-        setProgress(R.id.horizontal_margin, SP_VERTICAL_POS, 0.5f)
-        setProgress(R.id.scale, SP_VERTICAL_POS, 0.25f)
-        setProgress(R.id.rotate, SP_VERTICAL_POS, 0f)
+        setProgress(R.id.horizontal_margin, SP_HORIZONTAL_POS, 0.5f)
+        setProgress(R.id.scale, SP_SCALE, 0.25f)
+        setProgress(R.id.rotate, SP_ROTATE, 0f)
     }
 
     private fun setProgress(id: Int, sp: String, defaultValue: Float) {
         val seekBar = findViewById<SeekBar>(id)
-        seekBar.progress = (100 * sharedPreferencesUtil.getData(sp, defaultValue) as Float).toInt()
+        seekBar.progress = (100 * (sharedPreferencesUtil.getData(sp, defaultValue) as Float)).toInt()
         seekBar.setOnSeekBarChangeListener(this)
     }
 
@@ -104,6 +101,50 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
             R.id.scale -> sharedPreferencesUtil.putData(SharedPreferencesUtil.SP_SCALE, progress * 1.0f / 100)
         }
         dtv.resetConf(false)
+    }
+
+    fun adjustVerticalMargin(view: View) {
+        when ((view as TextView).text) {
+            "+" -> {
+                vertical_margin.progress = vertical_margin.progress + 1
+            }
+            "-" -> {
+                vertical_margin.progress = vertical_margin.progress - 1
+            }
+        }
+    }
+
+    fun adjustHorizontalMargin(view: View) {
+        when ((view as TextView).text) {
+            "+" -> {
+                horizontal_margin.progress = horizontal_margin.progress + 1
+            }
+            "-" -> {
+                horizontal_margin.progress = horizontal_margin.progress - 1
+            }
+        }
+    }
+
+    fun adjustScale(view: View) {
+        when ((view as TextView).text) {
+            "+" -> {
+                scale.progress = scale.progress + 1
+            }
+            "-" -> {
+                scale.progress = scale.progress - 1
+            }
+        }
+    }
+
+    fun adjustRotate(view: View) {
+        when ((view as TextView).text) {
+            "+" -> {
+                rotate.progress = rotate.progress + 1
+            }
+            "-" -> {
+                rotate.progress = rotate.progress - 1
+            }
+        }
     }
 
     override fun onStartTrackingTouch(seekBar: SeekBar) {

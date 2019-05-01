@@ -4,10 +4,10 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
         app:cardBackgroundColor="#ffffff"
-        app:cardElevation="2dp"
+        app:cardElevation="1dp"
         android:layout_margin="5dp"
         app:cardCornerRadius="3dp"
-        android:layout_height="64dp">
+        android:layout_height="60dp">
 
     <FrameLayout
             android:layout_gravity="center_vertical"
@@ -16,19 +16,21 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <TextView android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:textColor="#000000"
-                  android:id="@+id/tv_model_name"
-                  android:textSize="15sp"
-                  android:layout_gravity="center_vertical|left"
-                  android:text="样式1"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#000000"
+                android:id="@+id/tv_model_name"
+                android:textSize="16sp"
+                android:layout_gravity="center_vertical|left"
+                android:text="样式1"/>
 
-        <CheckBox android:layout_width="wrap_content"
-                  android:layout_height="wrap_content"
-                  android:id="@+id/cb_model"
-                  android:visibility="gone"
-                  android:layout_gravity="center_vertical|right"/>
+        <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/cb_model"
+                android:visibility="gone"
+                android:layout_gravity="center_vertical|right"/>
 
         <FrameLayout
                 android:clickable="true"

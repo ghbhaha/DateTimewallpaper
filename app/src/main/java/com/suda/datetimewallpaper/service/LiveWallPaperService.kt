@@ -59,7 +59,7 @@ class LiveWallPaperService : WallpaperService() {
                     for (i in 0..2) {
                         orientations[i] = Math.toDegrees(orientations[i].toDouble()).toFloat()
                     }
-                    dateTimeDrawer?.resetCameraMatrix(orientations[1], orientations[2], 0f)
+                    dateTimeDrawer?.resetCameraMatrix(orientations[1]/2, orientations[2]/2, 0f)
 
                 }
             }

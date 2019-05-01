@@ -85,5 +85,6 @@
 
     <string name="edit_name">修改名字</string>
     <string name="delete">删除</string>
+    <string name="group">QQ群</string>
 
 </resources>

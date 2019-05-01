@@ -3,6 +3,7 @@ package com.suda.datetimewallpaper.ui
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.*
 import android.widget.AdapterView
@@ -222,6 +223,18 @@ class HomeActivity : BaseAct(), NavigationView.OnNavigationItemSelectedListener 
             R.id.settings -> {
                 val intent = Intent(this, SettingsActivity::class.java)
                 startActivity(intent)
+            }
+            R.id.nav_group -> {
+                try {
+                    val intent = Intent()
+                    val KEY = "osvzvvRXXf5TvffW39CgXbxlmHtCscgK"
+                    intent.data =
+                        Uri.parse("mqqopensdkapi://bizAgent/qm/qr?url=http%3A%2F%2Fqm.qq.com%2Fcgi-bin%2Fqm%2Fqr%3Ffrom%3Dapp%26p%3Dandroid%26k%3D$KEY")
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Toast.makeText(this, "未安装手Q或安装的版本不支持", Toast.LENGTH_SHORT).show()
+                }
+
             }
         }
         return true

@@ -49,10 +49,28 @@
                     android:text="@string/vertical_pos"
                     android:textColor="#ffffff"/>
 
+            <TextView
+                    android:onClick="adjustVerticalMargin"
+                    android:layout_marginLeft="5dp"
+                    android:clickable="true"
+                    android:layout_width="20dp"
+                    android:gravity="center"
+                    android:layout_height="match_parent"
+                    android:text="-"/>
+
             <SeekBar
                     android:id="@+id/vertical_margin"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"/>
+
+            <TextView
+                    android:onClick="adjustVerticalMargin"
+                    android:clickable="true"
+                    android:layout_width="20dp"
+                    android:gravity="center"
+                    android:layout_height="match_parent"
+                    android:text="+"/>
 
         </LinearLayout>
 
@@ -69,10 +87,29 @@
                     android:text="@string/horizontal_pos"
                     android:textColor="#ffffff"/>
 
+            <TextView
+                    android:onClick="adjustHorizontalMargin"
+                    android:layout_marginLeft="5dp"
+                    android:clickable="true"
+                    android:layout_width="20dp"
+                    android:gravity="center"
+                    android:layout_height="match_parent"
+                    android:text="-"/>
+
             <SeekBar
                     android:id="@+id/horizontal_margin"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"/>
+
+            <TextView
+                    android:onClick="adjustHorizontalMargin"
+                    android:clickable="true"
+                    android:layout_width="20dp"
+                    android:gravity="center"
+                    android:layout_height="match_parent"
+                    android:text="+"/>
+
 
         </LinearLayout>
 
@@ -90,17 +127,36 @@
                     android:text="@string/scale"
                     android:textColor="#ffffff"/>
 
+
+            <TextView
+                    android:onClick="adjustScale"
+                    android:layout_marginLeft="5dp"
+                    android:clickable="true"
+                    android:layout_width="20dp"
+                    android:gravity="center"
+                    android:layout_height="match_parent"
+                    android:text="-"/>
+
             <SeekBar
                     android:id="@+id/scale"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"/>
+
+            <TextView
+                    android:onClick="adjustScale"
+                    android:clickable="true"
+                    android:layout_width="20dp"
+                    android:gravity="center"
+                    android:layout_height="match_parent"
+                    android:text="+"/>
+
 
         </LinearLayout>
 
         <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-
                 android:layout_margin="10dp"
                 android:gravity="center"
                 android:orientation="horizontal">
@@ -111,10 +167,29 @@
                     android:text="@string/rotate"
                     android:textColor="#ffffff"/>
 
+            <TextView
+                    android:onClick="adjustRotate"
+                    android:layout_marginLeft="5dp"
+                    android:clickable="true"
+                    android:layout_width="20dp"
+                    android:gravity="center"
+                    android:layout_height="match_parent"
+                    android:text="-"/>
+
             <SeekBar
                     android:id="@+id/rotate"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"/>
+
+            <TextView
+                    android:onClick="adjustRotate"
+                    android:clickable="true"
+                    android:layout_width="20dp"
+                    android:gravity="center"
+                    android:layout_height="match_parent"
+                    android:text="+"/>
+
         </LinearLayout>
 
         <LinearLayout

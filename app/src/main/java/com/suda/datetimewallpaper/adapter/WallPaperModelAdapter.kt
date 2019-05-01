@@ -1,5 +1,6 @@
 package com.suda.datetimewallpaper.adapter
 
+import android.app.AlertDialog
 import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,6 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
-import com.example.zhouwei.library.CustomPopWindow
 import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.bean.WallPaperModel
 import com.suda.datetimewallpaper.ui.SetViewActivity
@@ -35,19 +35,28 @@ class WallPaperModelAdapter(val wallpaperModels: MutableList<WallPaperModel>) :
 
     override fun onBindViewHolder(holder: WallPaperModelHolder, position: Int) {
         holder.tvName.text = wallpaperModels[position].modelName
+        holder.itemView.setOnClickListener(OnClick(holder, position))
+        holder.arrowBt.setOnClickListener(OnClick(holder, position))
+        holder.cbModel.visibility = View.GONE
+        holder.cbModel.isChecked = wallpaperModels[position].isCheck
+    }
 
-        holder.arrowBt.setOnClickListener { it ->
-            val contentView = LayoutInflater.from(it.context).inflate(R.layout.opt_layout, null)
-            val window = CustomPopWindow.PopupWindowBuilder(it.context)
+    inner class OnClick(val holder: WallPaperModelHolder, var position: Int) : View.OnClickListener {
+        override fun onClick(v: View) {
+            val contentView = LayoutInflater.from(v.context).inflate(R.layout.opt_layout, null)
+            val dialog = AlertDialog.Builder(holder.itemView.context)
                 .setView(contentView)
+                .setCancelable(true)
                 .create()
-                .showAsDropDown(holder.arrowBt_Inner, 0, 0)
+
+            dialog.show()
+
 
             contentView.findViewById<View>(R.id.edit_conf).setOnClickListener {
                 val intent = Intent(it.context, SetViewActivity::class.java)
                 intent.putExtra("paperId", wallpaperModels[position].paperId)
                 it.context.startActivity(intent)
-                window.dissmiss()
+                dialog.cancel()
             }
 
             contentView.findViewById<View>(R.id.edit_name).setOnClickListener { it ->
@@ -72,7 +81,7 @@ class WallPaperModelAdapter(val wallpaperModels: MutableList<WallPaperModel>) :
                     loadDialog.dismiss()
                 }
                 loadDialog.show()
-                window.dissmiss()
+                dialog.cancel()
             }
 
             contentView.findViewById<View>(R.id.edit_delete).setOnClickListener {
@@ -85,14 +94,12 @@ class WallPaperModelAdapter(val wallpaperModels: MutableList<WallPaperModel>) :
                 sp.deleteConf(wallpaperModels[position].paperId)
                 wallpaperModels.removeAt(position)
                 notifyDataSetChanged()
-                window.dissmiss()
+                dialog.cancel()
             }
 
         }
-
-        holder.cbModel.visibility = View.GONE
-        holder.cbModel.isChecked = wallpaperModels[position].isCheck
     }
+
 }
 
 class WallPaperModelHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

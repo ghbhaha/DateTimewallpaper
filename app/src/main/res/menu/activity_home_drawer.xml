@@ -13,8 +13,14 @@
                 android:title="@string/donate_zfb"/>
 
         <item
+                android:id="@+id/nav_group"
+                android:icon="@drawable/ic_group_work"
+                android:title="@string/group"/>
+
+        <item
                 android:id="@+id/nav_about"
                 android:icon="@drawable/ic_action_info"
                 android:title="@string/about"/>
+
     </group>
 </menu>

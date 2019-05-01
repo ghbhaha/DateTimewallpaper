@@ -6,6 +6,7 @@ import android.app.WallpaperManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.widget.Toast;
 import com.suda.datetimewallpaper.service.LiveWallPaperService;
 
 /**
@@ -20,13 +21,22 @@ final public class WallpaperUtil {
      */
     public static void setLiveWallpaper(Activity activity, int requestCode) {
         try {
-            Intent localIntent = new Intent();
-            localIntent.setAction(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
-            localIntent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
+            Intent intent = new Intent();
+            intent.setAction(WallpaperManager.ACTION_CHANGE_LIVE_WALLPAPER);
+            intent.putExtra(WallpaperManager.EXTRA_LIVE_WALLPAPER_COMPONENT,
                     new ComponentName(activity.getApplicationContext().getPackageName(), LiveWallPaperService.class.getCanonicalName()));
-            activity.startActivityForResult(localIntent, requestCode);
-        } catch (Exception localException) {
-            localException.printStackTrace();
+            activity.startActivityForResult(intent, requestCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Intent intent = new Intent();
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            intent.setAction("android.service.wallpaper.LIVE_WALLPAPER_CHOOSER");
+            try {
+                activity.startActivity(intent);
+            } catch (Exception e2) {
+                e2.printStackTrace();
+                Toast.makeText(activity, "您的系统壁纸功能貌似被阉割了...", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
