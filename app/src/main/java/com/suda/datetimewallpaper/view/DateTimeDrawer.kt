@@ -25,12 +25,14 @@ import java.text.SimpleDateFormat
 import java.util.*
 import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.TimeUnit
 
 /**
  * @author guhaibo
  * @date 2019/4/9
  */
+const val MAX_CAMERA_ROTATE = 20f
+
 class DateTimeDrawer {
 
     private var surfaceWidth = 0
@@ -85,7 +87,6 @@ class DateTimeDrawer {
 
     private var lunarCalendar: LunarCalendar? = null
 
-    private val start = AtomicBoolean(true)
     private var drawBean: DrawBean? = null
 
     private var cusTypeFace: Typeface? = null
@@ -104,19 +105,18 @@ class DateTimeDrawer {
 
     private var sharedPreferencesUtil: SharedPreferencesUtil? = null
 
-    private var loopAnimator: ValueAnimator? = null
-
 
     private val camera: Camera by lazy {
         Camera()
     }
     private val cameraMatrix = Matrix()
     private var mShakeAnim: ValueAnimator? = null
-    private val mMaxCameraRotate = 20f
     /* camera绕X轴旋转的角度 */
     private var mCameraRotateX: Float = 0f
     /* camera绕Y轴旋转的角度 */
     private var mCameraRotateY: Float = 0f
+
+    val paramChanges = mutableListOf<Runnable>()
 
     private val refreshTask = object : TimerTask() {
         override fun run() {
@@ -131,6 +131,9 @@ class DateTimeDrawer {
             secondIndex = mCurCalendar.get(Calendar.SECOND) - 1
             current = mCurCalendar.time
 
+            while (paramChanges.size > 0) {
+                paramChanges.removeAt(0).run()
+            }
 
             if (lastDayIndex != dayIndex) {
                 lunarCalendar = LunarCalendar(mCurCalendar)
@@ -167,9 +170,7 @@ class DateTimeDrawer {
                 secondDelta = 1f
             }
             secondDelta -= 1
-            if (start.get()) {
-                onDraw()
-            }
+            onDraw()
         }
     }
 
@@ -377,7 +378,6 @@ class DateTimeDrawer {
         clockPaint.isDither = true
         this.context = context
         surfaceHolder = holder
-
     }
 
     fun resetPaperId(paperId: Long, resetConf: Boolean = true) {
@@ -387,36 +387,37 @@ class DateTimeDrawer {
         }
     }
 
-
+    //////////////////resetConf running//////////////////////
     /**
      * 重新配置
      */
     fun resetConf(force: Boolean) {
-        start.set(false)
+        paramChanges.add(Runnable {
 
-        rotateForever = SharedPreferencesUtil.getAppDefault(context).getData("rotate_forever", false)
-        perspectiveMode  = SharedPreferencesUtil.getAppDefault(context).getData("perspective_mode", false)
+            rotateForever = SharedPreferencesUtil.getAppDefault(context).getData("rotate_forever", false)
+            perspectiveMode = SharedPreferencesUtil.getAppDefault(context).getData("perspective_mode", false)
 
 
-        verticalPos = sharedPreferencesUtil?.getData(SP_VERTICAL_POS, 0.5f) as Float
-        horizontalPos = sharedPreferencesUtil?.getData(SP_HORIZONTAL_POS, 0.5f) as Float
-        rotate = sharedPreferencesUtil?.getData(SP_ROTATE, 0f) as Float
+            verticalPos = sharedPreferencesUtil?.getData(SP_VERTICAL_POS, 0.5f) as Float
+            horizontalPos = sharedPreferencesUtil?.getData(SP_HORIZONTAL_POS, 0.5f) as Float
+            rotate = sharedPreferencesUtil?.getData(SP_ROTATE, 0f) as Float
 
-        scale = (2 * sharedPreferencesUtil?.getData(SP_SCALE, 0.25f) as Float + 0.5f) * 0.52f * (surfaceWidth / 1080f)
+            scale =
+                (2 * sharedPreferencesUtil?.getData(SP_SCALE, 0.25f) as Float + 0.5f) * 0.52f * (surfaceWidth / 1080f)
 
-        textColor = sharedPreferencesUtil?.getData(SP_TEXT_COLOR, Color.WHITE) as Int
-        darkenTextColor = sharedPreferencesUtil?.getData(SP_TEXT_COLOR_DARK, textColor.dark()) as Int
-        if (force) {
-            drawConfName = ""
-        }
-        resetJsonConf()
-        setBg()
+            textColor = sharedPreferencesUtil?.getData(SP_TEXT_COLOR, Color.WHITE) as Int
+            darkenTextColor = sharedPreferencesUtil?.getData(SP_TEXT_COLOR_DARK, textColor.dark()) as Int
+            if (force) {
+                drawConfName = ""
+            }
+            resetJsonConf()
+            setBg()
 
-        circleBaseline = 0f
-        lastDayIndex = -1
+            circleBaseline = 0f
+            lastDayIndex = -1
 
-        changeConf = true
-        start.set(true)
+            changeConf = true
+        })
     }
 
     private fun resetJsonConf() {
@@ -539,6 +540,7 @@ class DateTimeDrawer {
         }
         bgImg = tmpBg
     }
+    //////////////////resetConf end//////////////////////
 
     /**
      * 显示隐藏
@@ -551,24 +553,11 @@ class DateTimeDrawer {
         }
         if (visible) {
             cameraMatrix.reset()
-//            scheduledFuture =
-//                scheduledThreadPool.scheduleAtFixedRate(refreshTask, 0, schedule.toLong(), TimeUnit.MILLISECONDS)
-
-            loopAnimator = ValueAnimator.ofInt(0, 1000)
-            loopAnimator?.duration = 1000
-            loopAnimator?.repeatCount = ValueAnimator.INFINITE
-            loopAnimator?.addUpdateListener {
-                refreshTask.run()
-            }
-            loopAnimator?.start()
             resetConf(true)
+            scheduledFuture =
+                scheduledThreadPool.scheduleAtFixedRate(refreshTask, 0, schedule.toLong(), TimeUnit.MILLISECONDS)
         } else {
-
-            loopAnimator?.cancel()
-            loopAnimator = null
-
-//            scheduledFuture?.cancel(true)
-
+            scheduledFuture?.cancel(true)
             if (context !is Service) {
                 bgImg = ""
                 bgBitmap = null
@@ -585,8 +574,24 @@ class DateTimeDrawer {
     }
 
 
-    //////////////////////////////////////////
-
+    ////////////////CameraMatrix running////////////////////
+    fun resetCameraMatrix(mCameraRotateX: Float, mCameraRotateY: Float, mCameraRotateZ: Float, cancelShake: Boolean) {
+        if (cancelShake) {
+            mShakeAnim?.cancel()
+        }
+        paramChanges.add(Runnable {
+            camera.save();
+            cameraMatrix.reset()
+            camera.rotateX(mCameraRotateX)
+            camera.rotateY(mCameraRotateY);
+            camera.rotateZ(mCameraRotateZ);
+            camera.getMatrix(cameraMatrix)
+            cameraMatrix.preTranslate(-surfaceWidth * horizontalPos, -surfaceHeight * verticalPos);
+            cameraMatrix.postTranslate(surfaceWidth * horizontalPos, surfaceHeight * verticalPos);
+            camera.restore();
+            changeConf = true
+        })
+    }
 
     /**
      * 获取camera旋转的大小
@@ -594,52 +599,23 @@ class DateTimeDrawer {
      * @param event motionEvent
      */
     fun resetCameraRotate(event: MotionEvent) {
-        if (!perspectiveMode){
+        if (!perspectiveMode) {
             return
         }
-        mShakeAnim?.cancel()
-        mShakeAnim = null
         val rotateX = -(event.y - surfaceHeight * verticalPos);
         val rotateY = (event.x - surfaceWidth * horizontalPos);
         //求出此时旋转的大小与半径之比
         val percentArr = getPercent(rotateX, rotateY);
         //最终旋转的大小按比例匀称改变
-        mCameraRotateX = percentArr[0] * mMaxCameraRotate;
-        mCameraRotateY = percentArr[1] * mMaxCameraRotate;
-        resetCameraMatrix()
-    }
-
-    private fun resetCameraMatrix() {
-        camera.save();
-        cameraMatrix.reset()
-        camera.rotateX(mCameraRotateX)
-        camera.rotateY(mCameraRotateY);
-        camera.getMatrix(cameraMatrix)
-        cameraMatrix.preTranslate(-surfaceWidth * horizontalPos, -surfaceHeight * verticalPos);
-        cameraMatrix.postTranslate(surfaceWidth * horizontalPos, surfaceHeight * verticalPos);
-        camera.restore();
-        changeConf = true
-    }
-
-    fun resetCameraMatrix(mCameraRotateX: Float, mCameraRotateY: Float, mCameraRotateZ: Float) {
-        mShakeAnim?.cancel()
-        camera.save();
-        cameraMatrix.reset()
-        camera.rotateX(mCameraRotateX)
-        camera.rotateY(mCameraRotateY);
-        camera.rotateZ(mCameraRotateZ);
-        camera.getMatrix(cameraMatrix)
-        cameraMatrix.preTranslate(-surfaceWidth * horizontalPos, -surfaceHeight * verticalPos);
-        cameraMatrix.postTranslate(surfaceWidth * horizontalPos, surfaceHeight * verticalPos);
-        camera.restore();
-        changeConf = true
+        mCameraRotateX = percentArr[0] * MAX_CAMERA_ROTATE;
+        mCameraRotateY = percentArr[1] * MAX_CAMERA_ROTATE;
+        resetCameraMatrix(mCameraRotateX, mCameraRotateY, 0f, true)
     }
 
     /**
      * 时钟晃动动画
      */
     fun startShakeAnim() {
-
         mShakeAnim?.cancel()
         val cameraRotateXName = "cameraRotateX"
         val cameraRotateYName = "cameraRotateY"
@@ -665,7 +641,7 @@ class DateTimeDrawer {
         mShakeAnim?.addUpdateListener { animation ->
             mCameraRotateX = animation.getAnimatedValue(cameraRotateXName) as Float
             mCameraRotateY = animation.getAnimatedValue(cameraRotateYName) as Float
-            resetCameraMatrix()
+            resetCameraMatrix(mCameraRotateX, mCameraRotateY, 0f, false)
         }
         mShakeAnim?.start()
     }
@@ -689,4 +665,6 @@ class DateTimeDrawer {
         percentArr[1] = percentY
         return percentArr
     }
+    ////////////////CameraMatrix end////////////////////
+
 }
