@@ -31,6 +31,9 @@ public class SharedPreferencesUtil {
 
     public static final String SP_HIDE_ACT = "hide_from_recent";
 
+    public static final String AREA_NAME = "AREA_NAME";
+    public static final String AREA_CODE = "AREA_CODE";
+    public static final String AREA_WEATHER = "AREA_WEATHER";
 
     private SharedPreferences sp;
     private Context context;

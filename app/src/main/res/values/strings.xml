@@ -51,6 +51,12 @@
     <string name="switch_conf_tip">桌面连续点3次切换配置</string>
 
 
+    <string name="weather_settings">天气设置</string>
+    <string name="weather_settings_area">地区</string>
+    <string name="weather_settings_area_none">未设置地区</string>
+    <string name="weather_settings_dynamic">动态天气</string>
+    <string name="weather_settings_dynamic_summary">壁纸随天气显示动态效果</string>
+
     <string name="settings">设置</string>
     <string name="other_settings">其他设置</string>
 
@@ -86,5 +92,6 @@
     <string name="edit_name">修改名字</string>
     <string name="delete">删除</string>
     <string name="group">QQ群</string>
+    <string name="ok">确认</string>
 
 </resources>

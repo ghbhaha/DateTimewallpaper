@@ -16,9 +16,14 @@ import androidx.collection.ArrayMap
 import com.alibaba.fastjson.JSON
 import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.bean.DrawBean
+import com.suda.datetimewallpaper.bean.RealWeather
 import com.suda.datetimewallpaper.bean.TextBean
+import com.suda.datetimewallpaper.model.WeatherModel
 import com.suda.datetimewallpaper.util.*
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil.*
+import com.suda.datetimewallpaper.view.weather.*
+import io.reactivex.Observable
+import io.reactivex.schedulers.Schedulers
 import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
@@ -116,7 +121,13 @@ class DateTimeDrawer {
     /* camera绕Y轴旋转的角度 */
     private var mCameraRotateY: Float = 0f
 
-    val paramChanges = mutableListOf<Runnable>()
+    private val paramChanges = mutableListOf<Runnable>()
+
+    private var weatherDrawer: BaseWeather? = null
+
+    private val weatherModel by lazy {
+        WeatherModel()
+    }
 
     private val refreshTask = object : TimerTask() {
         override fun run() {
@@ -161,7 +172,7 @@ class DateTimeDrawer {
             }
 
             //静止时不再绘制，降低功耗
-            if (secondDelta == 0f && sd >= 1 && !changeConf) {
+            if (secondDelta == 0f && sd >= 1 && !changeConf && weatherDrawer == null) {
                 return
             }
             changeConf = false
@@ -191,6 +202,8 @@ class DateTimeDrawer {
             } else {
                 canvas.drawColor(bgColor)
             }
+            weatherDrawer?.draw(canvas)
+            weatherDrawer?.animLogic()
 
             val matrix = Matrix(cameraMatrix)
 
@@ -378,6 +391,7 @@ class DateTimeDrawer {
         clockPaint.isDither = true
         this.context = context
         surfaceHolder = holder
+
     }
 
     fun resetPaperId(paperId: Long, resetConf: Boolean = true) {
@@ -393,7 +407,6 @@ class DateTimeDrawer {
      */
     fun resetConf(force: Boolean) {
         paramChanges.add(Runnable {
-
             rotateForever = SharedPreferencesUtil.getAppDefault(context).getData("rotate_forever", false)
             perspectiveMode = SharedPreferencesUtil.getAppDefault(context).getData("perspective_mode", false)
 
@@ -552,6 +565,7 @@ class DateTimeDrawer {
             return
         }
         if (visible) {
+            refreshWeather()
             cameraMatrix.reset()
             resetConf(true)
             scheduledFuture =
@@ -666,5 +680,89 @@ class DateTimeDrawer {
         return percentArr
     }
     ////////////////CameraMatrix end////////////////////
+
+    ////////////////weatherDrawer start////////////////////
+
+    private fun refreshWeather() {
+        weatherDrawer = null
+        val sp = SharedPreferencesUtil.getAppDefault(context)
+        val dynamic = sp.getData("weather_settings_dynamic", false)
+        val lastWeather = sp.getData(AREA_WEATHER, "")
+        val areaCode = sp.getData(AREA_CODE, "")
+
+        val cache = Observable.create<RealWeather> {
+            if (!TextUtils.isEmpty(lastWeather)) {
+                val realWeather = JSON.parseObject(lastWeather, RealWeather::class.java)
+                //1小时过期
+                if (System.currentTimeMillis() - realWeather.lastUpdate < 60 * 60 * 1000) {
+                    it.onNext(realWeather)
+                }
+            }
+            it.onComplete()
+        }
+
+        val net = weatherModel.getWeather(areaCode).subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .doOnNext {
+                sp.putData(AREA_WEATHER, JSON.toJSONString(it))
+            }
+
+        Observable.concat(cache, net).firstElement()
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
+            .subscribe({
+                setWeather(it, dynamic)
+            }, {})
+    }
+
+    private fun setWeather(it: RealWeather, dynamic: Boolean) {
+        try {
+            var weather: BaseWeather? = null
+            if (it.weatherCondition == "晴") {
+                weather = SunnyDayWeather(surfaceWidth, surfaceHeight)
+            } else if (it.weatherCondition == "多云") {
+                weather = CloudyWeather(surfaceWidth, surfaceHeight)
+            } else if (
+                it.weatherCondition.contains("阴")) {
+                weather = CloudyWeather(surfaceWidth, surfaceHeight)
+            } else if (
+                it.weatherCondition.contains("雾")) {
+                weather = FogWeather(surfaceWidth, surfaceHeight)
+            } else if (it.weatherCondition.contains("雨")
+                && !it.weatherCondition.contains("雪")
+            ) {
+                weather = RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.RAIN)
+            } else if (!it.weatherCondition.contains("雨")
+                && it.weatherCondition.contains("雪")
+            ) {
+                weather = RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.SNOW)
+
+            } else if (it.weatherCondition.contains("雨")
+                && it.weatherCondition.contains("雪")
+            ) {
+                weather =
+                    RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.RAIN_SNOW)
+
+            } else if (
+                it.weatherCondition == "霾" ||
+                it.weatherCondition == "浮尘" ||
+                it.weatherCondition == "扬沙"
+            ) {
+                weather = RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.HAZE)
+            }
+            if (!dynamic) {
+                weather = null
+            }
+
+            this@DateTimeDrawer.paramChanges.add(Runnable {
+                this.weatherDrawer = weather
+            })
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    ////////////////weatherDrawer end////////////////////
+
 
 }

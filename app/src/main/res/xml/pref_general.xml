@@ -44,6 +44,25 @@
 
     <PreferenceCategory
             android:layout="@layout/preference_category_widget"
+            android:title="@string/weather_settings">
+
+        <PreferenceScreen
+                android:key="weather_settings_area"
+                android:layout="@layout/preference_item"
+                android:title="@string/weather_settings_area"
+                android:summary="@string/weather_settings_area_none"/>
+
+        <SwitchPreference
+                android:key="weather_settings_dynamic"
+                android:layout="@layout/preference_item"
+                android:title="@string/weather_settings_dynamic"
+                android:summary="@string/weather_settings_dynamic_summary"
+                android:defaultValue="false"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+            android:layout="@layout/preference_category_widget"
             android:title="@string/other_settings">
 
         <SwitchPreference

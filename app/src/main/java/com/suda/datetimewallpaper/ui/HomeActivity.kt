@@ -19,10 +19,7 @@ import com.suda.datetimewallpaper.adapter.WallPaperModelAdapter
 import com.suda.datetimewallpaper.base.BaseAct
 import com.suda.datetimewallpaper.bean.WallPaperModel
 import com.suda.datetimewallpaper.ui.about.AboutActivity
-import com.suda.datetimewallpaper.util.AlipayDonate
-import com.suda.datetimewallpaper.util.CheckUpdateUtil
-import com.suda.datetimewallpaper.util.SharedPreferencesUtil
-import com.suda.datetimewallpaper.util.setExcludeFromRecents
+import com.suda.datetimewallpaper.util.*
 import kotlinx.android.synthetic.main.activity_home.*
 import kotlinx.android.synthetic.main.home_content.*
 import me.drakeet.materialdialog.MaterialDialog
