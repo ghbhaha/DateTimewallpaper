@@ -2,12 +2,8 @@ package com.suda.datetimewallpaper.ui.about
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.PorterDuff
 import android.net.Uri
 
-import android.os.Bundle
-import android.os.PersistableBundle
-import com.danielstone.materialaboutlibrary.MaterialAboutActivity
 import com.danielstone.materialaboutlibrary.items.MaterialAboutActionItem
 import com.danielstone.materialaboutlibrary.items.MaterialAboutTitleItem
 import com.danielstone.materialaboutlibrary.model.MaterialAboutCard
@@ -16,7 +12,6 @@ import com.suda.datetimewallpaper.BuildConfig
 import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.base.BaseAboutActivity
 import com.suda.datetimewallpaper.util.CheckUpdateUtil
-import java.lang.Exception
 
 
 /**
@@ -76,7 +71,6 @@ class AboutActivity : BaseAboutActivity() {
                 }
                 .build())
 
-
         val cardAOtherBuilder = MaterialAboutCard.Builder()
         cardAOtherBuilder.title("其他")
             .addItem(MaterialAboutActionItem.Builder()
@@ -94,23 +88,6 @@ class AboutActivity : BaseAboutActivity() {
                 }
 
                 .build())
-
-            .addItem(MaterialAboutActionItem.Builder()
-                .text("更多表盘配置")
-                .subText("https://timeconf.sudamod.site/")
-                .icon(
-                    R.drawable.ic_action_github
-                )
-                .setOnClickAction {
-                    val intent = Intent()
-                    intent.action = "android.intent.action.VIEW"
-                    val content_url = Uri.parse("https://timeconf.sudamod.site/")
-                    intent.data = content_url
-                    startActivity(intent)
-                }.build()
-            )
-
-
 
         return MaterialAboutList.Builder()
             .addCard(cardAppBuilder.build())

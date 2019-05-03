@@ -34,7 +34,7 @@ public class CheckUpdateUtil {
             innerDialog.show();
         }
         OkHttpClient okHttpClient = new OkHttpClient();
-        Request request = new Request.Builder().url("https://raw.githubusercontent.com/ghbhaha/DateTimewallpaper_Communication/master/update.json").get().build();
+        Request request = new Request.Builder().url("https://ghbhaha.github.io/DateTimewallpaper_Communication/update.json").get().build();
         okHttpClient.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
