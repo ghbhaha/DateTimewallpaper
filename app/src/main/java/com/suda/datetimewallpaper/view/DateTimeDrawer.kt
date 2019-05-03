@@ -110,7 +110,6 @@ class DateTimeDrawer {
 
     private var sharedPreferencesUtil: SharedPreferencesUtil? = null
 
-
     private val camera: Camera by lazy {
         Camera()
     }
@@ -124,6 +123,8 @@ class DateTimeDrawer {
     private val paramChanges = mutableListOf<Runnable>()
 
     private var weatherDrawer: BaseWeather? = null
+
+    private var currentRealWeather: RealWeather? = null
 
     private val weatherModel by lazy {
         WeatherModel()
@@ -240,6 +241,28 @@ class DateTimeDrawer {
                             simpleDateFormatMap[textBean.array[0]] = simpleDateFormat
                         }
                         centerText = simpleDateFormat.format(current)
+                    } else if ("weather" == textBean.type) {
+                        if (currentRealWeather != null) {
+                            currentRealWeather?.run {
+                                val index = getIndex(textBean)
+                                if (index.index < textBean.array.size) {
+                                    centerText = textBean.array[index.index]
+                                    if (centerText.contains("\$area")) {
+                                        centerText = centerText.replace("\$area", this.areaName)
+                                    }
+
+                                    if (centerText.contains("\$temp")) {
+                                        centerText = centerText.replace("\$temp", this.temp.toString() + "°C")
+                                    }
+
+                                    if (centerText.contains("\$condition")) {
+                                        centerText = centerText.replace("\$condition", this.weatherCondition)
+                                    }
+                                }
+                            }
+                        } else {
+                            centerText = "未获取天气"
+                        }
                     } else {
                         val index = getIndex(textBean)
                         if (index.index < textBean.array.size) {
@@ -691,12 +714,16 @@ class DateTimeDrawer {
         val areaCode = sp.getData(AREA_CODE, "")
 
         val cache = Observable.create<RealWeather> {
-            if (!TextUtils.isEmpty(lastWeather)) {
-                val realWeather = JSON.parseObject(lastWeather, RealWeather::class.java)
-                //1小时过期
-                if (System.currentTimeMillis() - realWeather.lastUpdate < 60 * 60 * 1000) {
-                    it.onNext(realWeather)
+            try {
+                if (!TextUtils.isEmpty(lastWeather)) {
+                    val realWeather = JSON.parseObject(lastWeather, RealWeather::class.java)
+                    //1小时过期
+                    if (System.currentTimeMillis() - realWeather.lastUpdate < 60 * 60 * 1000) {
+                        it.onNext(realWeather)
+                    }
                 }
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
             it.onComplete()
         }
@@ -717,6 +744,7 @@ class DateTimeDrawer {
 
     private fun setWeather(it: RealWeather, dynamic: Boolean) {
         try {
+            currentRealWeather = it
             var weather: BaseWeather? = null
             if (it.weatherCondition == "晴") {
                 weather = SunnyDayWeather(surfaceWidth, surfaceHeight)
