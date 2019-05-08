@@ -80,25 +80,25 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
 
     private fun setProgress(id: Int, sp: String, defaultValue: Float) {
         val seekBar = findViewById<SeekBar>(id)
-        seekBar.progress = (100 * (sharedPreferencesUtil.getData(sp, defaultValue) as Float)).toInt()
+        seekBar.progress = (seekBar.max * (sharedPreferencesUtil.getData(sp, defaultValue) as Float)).toInt()
         seekBar.setOnSeekBarChangeListener(this)
     }
 
     override fun onProgressChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean) {
         var progress = progress
         when (seekBar.id) {
-            R.id.vertical_margin -> sharedPreferencesUtil.putData(SP_VERTICAL_POS, progress * 1.0f / 100)
+            R.id.vertical_margin -> sharedPreferencesUtil.putData(SP_VERTICAL_POS, progress * 1.0f / seekBar.max)
             R.id.horizontal_margin -> sharedPreferencesUtil.putData(
                 SharedPreferencesUtil.SP_HORIZONTAL_POS,
-                progress * 1.0f / 100
+                progress * 1.0f / seekBar.max
             )
             R.id.rotate -> {
                 if (Math.abs(progress % 25 - 1) < 1) {
                     progress = progress / 25 * 25
                 }
-                sharedPreferencesUtil.putData(SharedPreferencesUtil.SP_ROTATE, progress * 1.0f / 100)
+                sharedPreferencesUtil.putData(SharedPreferencesUtil.SP_ROTATE, progress * 1.0f / seekBar.max)
             }
-            R.id.scale -> sharedPreferencesUtil.putData(SharedPreferencesUtil.SP_SCALE, progress * 1.0f / 100)
+            R.id.scale -> sharedPreferencesUtil.putData(SharedPreferencesUtil.SP_SCALE, progress * 1.0f / seekBar.max)
         }
         dtv.resetConf(false)
     }

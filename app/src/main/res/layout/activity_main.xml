@@ -61,6 +61,7 @@
             <SeekBar
                     android:id="@+id/vertical_margin"
                     android:layout_weight="1"
+                    android:max="1000"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"/>
 
@@ -99,6 +100,7 @@
             <SeekBar
                     android:id="@+id/horizontal_margin"
                     android:layout_weight="1"
+                    android:max="1000"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"/>
 
@@ -141,6 +143,7 @@
                     android:id="@+id/scale"
                     android:layout_weight="1"
                     android:layout_width="0dp"
+                    android:max="1000"
                     android:layout_height="match_parent"/>
 
             <TextView
@@ -180,6 +183,7 @@
                     android:id="@+id/rotate"
                     android:layout_weight="1"
                     android:layout_width="0dp"
+                    android:max="1000"
                     android:layout_height="match_parent"/>
 
             <TextView
