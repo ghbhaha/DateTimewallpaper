@@ -126,6 +126,8 @@ class DateTimeDrawer {
 
     private var currentRealWeather: RealWeather? = null
 
+    private var advanceAmPm = 0
+
     private val weatherModel by lazy {
         WeatherModel()
     }
@@ -163,6 +165,26 @@ class DateTimeDrawer {
 
             if (secondIndex == -1) {
                 secondIndex = 59
+            }
+
+            var hours = mCurCalendar.get(Calendar.HOUR)
+            advanceAmPm = if (amOrPm == Calendar.AM) {
+                when {
+                    hours < 5 -> 0
+                    hours in 5..6 -> 1
+                    hours in 7..8 -> 2
+                    hours in 9..11 -> 3
+                    else -> 0
+                }
+            } else {
+                when {
+                    hours == 0 -> 4
+                    hours < 6 -> 5
+                    hours in 6..9 -> 6
+                    hours in 10..11 -> 7
+                    hours == 12 -> 4
+                    else -> 4
+                }
             }
 
             //处理动画
@@ -389,6 +411,9 @@ class DateTimeDrawer {
             }
             "ampm" -> {
                 curIndex = amOrPm
+            }
+            "advance_ampm" -> {
+                curIndex = advanceAmPm
             }
             else -> {
                 curIndex = 0
