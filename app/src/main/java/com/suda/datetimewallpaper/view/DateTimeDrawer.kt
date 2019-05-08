@@ -607,6 +607,7 @@ class DateTimeDrawer {
         surfaceWidth = width
         surfaceHeight = height
         bgImg = ""
+        refreshWeather()
         setBg()
     }
 
@@ -709,7 +710,7 @@ class DateTimeDrawer {
     private fun refreshWeather() {
         weatherDrawer = null
         val sp = SharedPreferencesUtil.getAppDefault(context)
-        val dynamic = sp.getData("weather_settings_dynamic", false)
+        val dynamic = sp.getData("weather_settings_dynamic", true)
         val lastWeather = sp.getData(AREA_WEATHER, "")
         val areaCode = sp.getData(AREA_CODE, "")
 
@@ -747,7 +748,14 @@ class DateTimeDrawer {
             currentRealWeather = it
             var weather: BaseWeather? = null
             if (it.weatherCondition == "晴") {
-                weather = SunnyDayWeather(surfaceWidth, surfaceHeight)
+                val hour = this.hourIndex + 1
+                if (hour in 19..23) {
+                    weather = SunnyNightWeather(surfaceWidth, surfaceHeight)
+                } else if (hour in 0..6) {
+                    weather = SunnyNightWeather(surfaceWidth, surfaceHeight)
+                } else {
+                    weather = SunnyDayWeather(surfaceWidth, surfaceHeight)
+                }
             } else if (it.weatherCondition == "多云") {
                 weather = CloudyWeather(surfaceWidth, surfaceHeight)
             } else if (

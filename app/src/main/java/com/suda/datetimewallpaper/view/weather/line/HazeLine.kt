@@ -1,7 +1,5 @@
 package com.suda.datetimewallpaper.view.weather.line
 
-import com.suda.datetimewallpaper.view.weather.line.BaseLine
-
 /**
  * Created by ghbha on 2016/5/16.
  */

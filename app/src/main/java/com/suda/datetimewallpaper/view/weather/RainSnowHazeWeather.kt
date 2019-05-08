@@ -12,7 +12,7 @@ import com.suda.datetimewallpaper.view.weather.line.RainOrSnowLine
  * @author guhaibo
  * @date 2019/5/3
  */
-const val RAIN_COUNT = 60 //雨点个数
+const val RAIN_COUNT = 120 //雨点个数
 
 class RainSnowHazeWeather(width: Int, height: Int, private val type: Type = Type.RAIN) : BaseWeather(width, height) {
 
