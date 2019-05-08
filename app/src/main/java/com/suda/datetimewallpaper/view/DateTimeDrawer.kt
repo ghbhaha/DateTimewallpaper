@@ -711,88 +711,100 @@ class DateTimeDrawer {
         weatherDrawer = null
         val sp = SharedPreferencesUtil.getAppDefault(context)
         val dynamic = sp.getData("weather_settings_dynamic", true)
-        val lastWeather = sp.getData(AREA_WEATHER, "")
-        val areaCode = sp.getData(AREA_CODE, "")
+        val autoLoc = sp.getData("weather_settings_auto_loc", false)
+        setWeather(currentRealWeather, dynamic)
 
-        val cache = Observable.create<RealWeather> {
-            try {
-                if (!TextUtils.isEmpty(lastWeather)) {
-                    val realWeather = JSON.parseObject(lastWeather, RealWeather::class.java)
-                    //1小时过期
-                    if (System.currentTimeMillis() - realWeather.lastUpdate < 60 * 60 * 1000) {
-                        it.onNext(realWeather)
-                    }
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-            it.onComplete()
+        val lastWeather = sp.getData(AREA_WEATHER, "")
+        var areaCode = sp.getData(AREA_CODE, "")
+
+        val city = if (autoLoc) AmapUtil.getLocation(context) else {
+            Observable.just(areaCode)
         }
 
-        val net = weatherModel.getWeather(areaCode).subscribeOn(Schedulers.io())
-            .observeOn(Schedulers.io())
-            .doOnNext {
-                sp.putData(AREA_WEATHER, JSON.toJSONString(it))
+        city.flatMap {
+            var areaCode = it
+            val cache = Observable.create<RealWeather> {
+                try {
+                    if (!TextUtils.isEmpty(lastWeather)) {
+                        val realWeather = JSON.parseObject(lastWeather, RealWeather::class.java)
+                        //1小时过期
+                        if (System.currentTimeMillis() - realWeather.lastUpdate < 60 * 60 * 1000 && realWeather.areaid == areaCode) {
+                            it.onNext(realWeather)
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+                it.onComplete()
             }
 
-        Observable.concat(cache, net).firstElement()
-            .subscribeOn(Schedulers.io())
+            val net = weatherModel.getWeather(areaCode).subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.io())
+                .doOnNext {
+                    sp.putData(AREA_WEATHER, JSON.toJSONString(it))
+                }
+
+            Observable.concat(cache, net)
+        }.firstElement().subscribeOn(Schedulers.io())
             .observeOn(Schedulers.io())
             .subscribe({
                 setWeather(it, dynamic)
             }, {})
     }
 
-    private fun setWeather(it: RealWeather, dynamic: Boolean) {
+    private fun setWeather(it: RealWeather?, dynamic: Boolean) {
         try {
-            currentRealWeather = it
-            var weather: BaseWeather? = null
-            if (it.weatherCondition == "晴") {
-                val hour = this.hourIndex + 1
-                if (hour in 19..23) {
-                    weather = SunnyNightWeather(surfaceWidth, surfaceHeight)
-                } else if (hour in 0..6) {
-                    weather = SunnyNightWeather(surfaceWidth, surfaceHeight)
-                } else {
-                    weather = SunnyDayWeather(surfaceWidth, surfaceHeight)
+            it?.run {
+                currentRealWeather = it
+                var weather: BaseWeather? = null
+                if (it.weatherCondition == "晴") {
+                    val hour = this@DateTimeDrawer.hourIndex + 1
+                    if (hour in 19..23) {
+                        weather = SunnyNightWeather(surfaceWidth, surfaceHeight)
+                    } else if (hour in 0..6) {
+                        weather = SunnyNightWeather(surfaceWidth, surfaceHeight)
+                    } else {
+                        weather = SunnyDayWeather(surfaceWidth, surfaceHeight)
+                    }
+                } else if (it.weatherCondition == "多云") {
+                    weather = CloudyWeather(surfaceWidth, surfaceHeight)
+                } else if (
+                    it.weatherCondition.contains("阴")) {
+                    weather = CloudyWeather(surfaceWidth, surfaceHeight)
+                } else if (
+                    it.weatherCondition.contains("雾")) {
+                    weather = FogWeather(surfaceWidth, surfaceHeight)
+                } else if (it.weatherCondition.contains("雨")
+                    && !it.weatherCondition.contains("雪")
+                ) {
+                    weather = RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.RAIN)
+                } else if (!it.weatherCondition.contains("雨")
+                    && it.weatherCondition.contains("雪")
+                ) {
+                    weather = RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.SNOW)
+
+                } else if (it.weatherCondition.contains("雨")
+                    && it.weatherCondition.contains("雪")
+                ) {
+                    weather =
+                        RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.RAIN_SNOW)
+
+                } else if (
+                    it.weatherCondition == "霾" ||
+                    it.weatherCondition == "浮尘" ||
+                    it.weatherCondition == "扬沙"
+                ) {
+                    weather = RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.HAZE)
                 }
-            } else if (it.weatherCondition == "多云") {
-                weather = CloudyWeather(surfaceWidth, surfaceHeight)
-            } else if (
-                it.weatherCondition.contains("阴")) {
-                weather = CloudyWeather(surfaceWidth, surfaceHeight)
-            } else if (
-                it.weatherCondition.contains("雾")) {
-                weather = FogWeather(surfaceWidth, surfaceHeight)
-            } else if (it.weatherCondition.contains("雨")
-                && !it.weatherCondition.contains("雪")
-            ) {
-                weather = RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.RAIN)
-            } else if (!it.weatherCondition.contains("雨")
-                && it.weatherCondition.contains("雪")
-            ) {
-                weather = RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.SNOW)
+                if (!dynamic) {
+                    weather = null
+                }
 
-            } else if (it.weatherCondition.contains("雨")
-                && it.weatherCondition.contains("雪")
-            ) {
-                weather =
-                    RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.RAIN_SNOW)
-
-            } else if (
-                it.weatherCondition == "霾" ||
-                it.weatherCondition == "浮尘" ||
-                it.weatherCondition == "扬沙"
-            ) {
-                weather = RainSnowHazeWeather(surfaceWidth, surfaceHeight, RainSnowHazeWeather.Type.HAZE)
-            }
-            if (!dynamic) {
-                weather = null
+                this@DateTimeDrawer.paramChanges.add(Runnable {
+                    this@DateTimeDrawer.weatherDrawer = weather
+                })
             }
 
-            this@DateTimeDrawer.paramChanges.add(Runnable {
-                this.weatherDrawer = weather
-            })
         } catch (e: Exception) {
             e.printStackTrace()
         }

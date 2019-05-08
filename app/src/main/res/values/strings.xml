@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">时间轮盘</string>
     <string name="storage_permission">时间轮盘需要存储权限选择图片</string>
+
+    <string name="loc_permission">时间轮盘需要定位权限获取位置</string>
+
     <string name="num_format">大写数字</string>
 
     <string name="donate_zfb">打赏</string>
@@ -52,6 +55,10 @@
 
 
     <string name="weather_settings">天气设置</string>
+
+    <string name="weather_settings_auto_loc">自动定位</string>
+
+
     <string name="weather_settings_area">地区</string>
     <string name="weather_settings_area_none">未设置地区</string>
     <string name="weather_settings_dynamic">动态天气</string>
@@ -93,5 +100,15 @@
     <string name="delete">删除</string>
     <string name="group">QQ群</string>
     <string name="ok">确认</string>
+
+
+    <string name="lc">AM</string>
+    <string name="lm">AM</string>
+    <string name="zc">AM</string>
+    <string name="sw">AM</string>
+    <string name="zw">PM</string>
+    <string name="xw">PM</string>
+    <string name="bw">PM</string>
+    <string name="sy">PM</string>
 
 </resources>

@@ -1,5 +1,6 @@
 package com.suda.datetimewallpaper.ui
 
+import android.Manifest
 import android.content.Context
 import android.os.Bundle
 import android.text.Editable
@@ -20,18 +21,29 @@ import com.suda.datetimewallpaper.util.SharedPreferencesUtil
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil.*
 import com.suda.datetimewallpaper.util.setExcludeFromRecents
 import me.drakeet.materialdialog.MaterialDialog
+import pub.devrel.easypermissions.AfterPermissionGranted
+import pub.devrel.easypermissions.EasyPermissions
 
 
 class SettingsActivity : BaseAct() {
 
+    val settingFragment =  SettingFragment()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         this.fragmentManager
             .beginTransaction()
-            .replace(android.R.id.content, SettingFragment())
+            .replace(android.R.id.content,settingFragment)
             .commit()
+    }
+
+
+    @AfterPermissionGranted(REQUEST_CODE_PERMISSION2)
+    fun getLocPermission() {
+        settingFragment.getLocPermission()
     }
 
 }
@@ -51,12 +63,31 @@ class SettingFragment : androidx.preference.PreferenceFragment() {
         }
     }
 
+
     override fun onPreferenceTreeClick(preference: Preference): Boolean {
         if (preference.key == "hide_from_recent") {
             if (preference is SwitchPreference) {
                 activity.setExcludeFromRecents(preference.isChecked)
             }
+        } else if (preference.key == "weather_settings_auto_loc") {
+            val perms = arrayOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE)
+            if (!EasyPermissions.hasPermissions(activity, *perms)) {
+                EasyPermissions.requestPermissions(
+                    activity, getString(R.string.loc_permission),
+                    REQUEST_CODE_PERMISSION2, *perms
+                )
+                (preference as SwitchPreference).isChecked = false
+                return true
+            }
         } else if (preference.key == "weather_settings_area") {
+            if ((findPreference("weather_settings_auto_loc") as SwitchPreference).isChecked) {
+                Toast.makeText(activity, "已启用自动定位", Toast.LENGTH_SHORT).show()
+                return true
+            }
             val dialog = MaterialDialog(activity)
             dialog.setTitle(R.string.weather_settings_area)
 
@@ -110,6 +141,10 @@ class SettingFragment : androidx.preference.PreferenceFragment() {
             dialog.show()
         }
         return super.onPreferenceTreeClick(preference)
+    }
+
+    fun getLocPermission() {
+        (findPreference("weather_settings_auto_loc") as SwitchPreference).isChecked = true
     }
 
 

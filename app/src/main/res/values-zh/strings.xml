@@ -53,4 +53,13 @@
     <string name="rotate_forever">永动模式</string>
     <string name="rotate_forever_summary">轮盘将不停转动，可能会非常耗电</string>
 
+
+    <string name="lc">"凌晨"</string>
+    <string name="lm">"黎明"</string>
+    <string name="zc">"早晨"</string>
+    <string name="sw">"上午"</string>
+    <string name="zw">"中午"</string>
+    <string name="xw">"下午"</string>
+    <string name="bw">"晚上"</string>
+    <string name="sy">"深夜"</string>
 </resources>
