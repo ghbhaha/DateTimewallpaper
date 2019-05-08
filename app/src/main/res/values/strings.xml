@@ -101,14 +101,4 @@
     <string name="group">QQ群</string>
     <string name="ok">确认</string>
 
-
-    <string name="lc">AM</string>
-    <string name="lm">AM</string>
-    <string name="zc">AM</string>
-    <string name="sw">AM</string>
-    <string name="zw">PM</string>
-    <string name="xw">PM</string>
-    <string name="bw">PM</string>
-    <string name="sy">PM</string>
-
 </resources>
