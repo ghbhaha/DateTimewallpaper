@@ -6,6 +6,9 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'kotlin-kapt'
 
+apply plugin: 'AndResGuard'
+
+
 
 def releaseTime() {
     def date = new Date()
@@ -21,8 +24,8 @@ android {
         flavorDimensions "NORMAL"
         minSdkVersion 19
         targetSdkVersion 28
-        versionCode 29
-        versionName "2.32"
+        versionCode 30
+        versionName "2.32.0508"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables.useSupportLibrary = true
     }
@@ -75,6 +78,64 @@ android {
                 outputFileName = "DateTimeWallPaper_${variant.versionCode}-${variant.versionName}-${releaseTime()}.apk"
             }
         }
+    }
+}
+
+andResGuard {
+    // mappingFile = file("./resource_mapping.txt")
+    mappingFile = null
+    use7zip = true
+    useSign = true
+    // it will keep the origin path of your resources when it's true
+    keepRoot = false
+    whiteList = [
+            // your icon
+            "R.drawable.icon",
+            // for fabric
+            "R.string.com.crashlytics.*",
+            // for umeng update
+            "R.string.umeng*",
+            "R.string.UM*",
+            "R.string.tb_*",
+            "R.string.rc_*",
+            "R.layout.umeng*",
+            "R.layout.tb_*",
+            "R.layout.rc_*",
+            "R.drawable.umeng*",
+            "R.drawable.tb_*",
+            "R.drawable.rc_*",
+            "R.drawable.u1*",
+            "R.drawable.u2*",
+            "R.anim.umeng*",
+            "R.color.umeng*",
+            "R.color.tb_*",
+            "R.color.rc_*",
+            "R.style.*UM*",
+            "R.style.umeng*",
+            "R.style.rc_*",
+            "R.id.umeng*",
+            "R.id.rc_*",
+            // umeng share for sina
+            "R.drawable.sina*",
+            // for google-services.json
+            "R.string.google_app_id",
+            "R.string.gcm_defaultSenderId",
+            "R.string.default_web_client_id",
+            "R.string.ga_trackingId",
+            "R.string.firebase_database_url",
+            "R.string.google_api_key",
+            "R.string.google_crash_reporting_api_key",
+            "R.dimen.rc_*"
+    ]
+    compressFilePattern = [
+            "*.png",
+            "*.jpg",
+            "*.jpeg",
+            "*.gif",
+            "resources.arsc"
+    ]
+    sevenzip {
+        artifact = 'com.tencent.mm:SevenZip:1.2.15'
     }
 }
 
