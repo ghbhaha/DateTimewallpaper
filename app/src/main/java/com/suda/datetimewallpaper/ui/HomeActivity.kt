@@ -5,6 +5,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.*
 import android.widget.AdapterView
 import android.widget.ListView
@@ -50,8 +51,6 @@ class HomeActivity : BaseAct(), NavigationView.OnNavigationItemSelectedListener 
         rcy_model.layoutManager = LinearLayoutManager(this, RecyclerView.VERTICAL, false)
         rcy_model.adapter = WallPaperModelAdapter(modelList)
 
-        AlipayDonate.donateTip("gomain", 2, this)
-        CheckUpdateUtil.checkUpdate(this, false)
 
         initView()
         initConfs()
@@ -76,6 +75,13 @@ class HomeActivity : BaseAct(), NavigationView.OnNavigationItemSelectedListener 
                 false
             )
         )
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        Log.d("onNewIntent","onNewIntent")
+        AlipayDonate.donateTip("gomain", 2, this)
+        CheckUpdateUtil.checkUpdate(this, false)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
