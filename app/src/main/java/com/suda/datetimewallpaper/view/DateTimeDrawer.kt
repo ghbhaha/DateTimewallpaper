@@ -100,9 +100,9 @@ class DateTimeDrawer {
     private var perspectiveMode = false
 
     /**
-     * 用于刷新农历
+     * 用于刷新dateformat
      */
-    private var lastDayIndex = -1
+    private var lastHourIndex = -1
     /**
      * 优化反复创建SimpleDateFormat
      */
@@ -128,6 +128,16 @@ class DateTimeDrawer {
 
     private var advanceAmPm = 0
 
+    /**
+     * 是否中文环境
+     */
+    private var isZh = false
+
+    /**
+     * 细分化时间
+     */
+    private lateinit var advanceAmPmArray: Array<String>
+
     private val weatherModel by lazy {
         WeatherModel()
     }
@@ -149,10 +159,10 @@ class DateTimeDrawer {
                 paramChanges.removeAt(0).run()
             }
 
-            if (lastDayIndex != dayIndex) {
+            if (lastHourIndex != hourIndex) {
                 lunarCalendar = LunarCalendar(mCurCalendar)
                 simpleDateFormatMap.clear()
-                lastDayIndex = dayIndex
+                lastHourIndex = hourIndex
             }
 
             if (hourIndex == -1) {
@@ -255,10 +265,13 @@ class DateTimeDrawer {
                         var simpleDateFormat = simpleDateFormatMap[textBean.array[0]]
                         if (simpleDateFormat == null) {
                             //农历解析
-                            val format = textBean.array[0]
+                            var format = textBean.array[0]
                                 .replace("LA", lunarCalendar!!.animalsYear())
                                 .replace("LM", lunarCalendar!!.monthStr)
                                 .replace("LD", lunarCalendar!!.dayStr)
+                            if (isZh) {
+                                format = format.replace("a", advanceAmPmArray[advanceAmPm])
+                            }
                             simpleDateFormat = SimpleDateFormat(format)
                             simpleDateFormatMap[textBean.array[0]] = simpleDateFormat
                         }
@@ -439,7 +452,24 @@ class DateTimeDrawer {
         clockPaint.isDither = true
         this.context = context
         surfaceHolder = holder
+        initAdavanceAmPm(context)
+    }
 
+    private fun initAdavanceAmPm(context: Context) {
+        val locale = context.getResources().getConfiguration().locale;
+        isZh = locale.language.endsWith("zh")
+        if (isZh) {
+            advanceAmPmArray = arrayOf(
+                context.getString(R.string.lc),
+                context.getString(R.string.lm),
+                context.getString(R.string.zc),
+                context.getString(R.string.sw),
+                context.getString(R.string.zw),
+                context.getString(R.string.xw),
+                context.getString(R.string.bw),
+                context.getString(R.string.sy)
+            )
+        }
     }
 
     fun resetPaperId(paperId: Long, resetConf: Boolean = true) {
@@ -475,7 +505,7 @@ class DateTimeDrawer {
             setBg()
 
             circleBaseline = 0f
-            lastDayIndex = -1
+            lastHourIndex = -1
 
             changeConf = true
         })
