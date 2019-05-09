@@ -14,7 +14,7 @@ class DateTimeDreamService : DreamService() {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         isFullscreen = true
-        setContentView(R.layout.dream_service_layout)
+        setContentView(R.layout.layout_dream_service)
         val dateTimeView = findViewById<View>(R.id.dtv) as DateTimeView
         val sharedPreferencesUtil = SharedPreferencesUtil(this)
         dateTimeView.resetPaperId(sharedPreferencesUtil.nextWallPaperDream)

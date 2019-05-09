@@ -91,7 +91,7 @@ class SettingFragment : androidx.preference.PreferenceFragment() {
             val dialog = MaterialDialog(activity)
             dialog.setTitle(R.string.weather_settings_area)
 
-            val viewGroup = LayoutInflater.from(activity).inflate(R.layout.area_select, null)
+            val viewGroup = LayoutInflater.from(activity).inflate(R.layout.layout_area_select, null)
             dialog.setContentView(viewGroup)
             val autoText = viewGroup.findViewById<AutoCompleteTextView>(R.id.at_area)
 

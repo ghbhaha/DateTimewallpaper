@@ -43,7 +43,7 @@ class WallPaperModelAdapter(val wallpaperModels: MutableList<WallPaperModel>) :
 
     inner class OnClick(val holder: WallPaperModelHolder, var position: Int) : View.OnClickListener {
         override fun onClick(v: View) {
-            val contentView = LayoutInflater.from(v.context).inflate(R.layout.opt_layout, null)
+            val contentView = LayoutInflater.from(v.context).inflate(R.layout.layout_opt, null)
             val dialog = AlertDialog.Builder(holder.itemView.context)
                 .setView(contentView)
                 .setCancelable(true)

@@ -21,7 +21,7 @@ import com.suda.datetimewallpaper.util.FileUtil.copyFile
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil.*
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_set_view.*
 import me.drakeet.materialdialog.MaterialDialog
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
@@ -51,7 +51,7 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_set_view)
 
         dtv.setOnClickListener {
             panel.visibility = if (panel.visibility == View.VISIBLE) {
@@ -323,7 +323,7 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
         if (EasyPermissions.hasPermissions(this, *perms)) {
             val outDialog = MaterialDialog(this)
             outDialog.setTitle(R.string.select_conf)
-            val viewGroup = LayoutInflater.from(this).inflate(R.layout.cus_conf_layout, null) as ViewGroup
+            val viewGroup = LayoutInflater.from(this).inflate(R.layout.layout_cus_conf, null) as ViewGroup
             val listView = viewGroup.findViewById<ListView>(R.id.conf_list)
             val restoreAdapter = CusAdapter()
             listView.onItemLongClickListener = AdapterView.OnItemLongClickListener { parent, view, position, id ->

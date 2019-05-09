@@ -22,7 +22,7 @@ import com.suda.datetimewallpaper.bean.WallPaperModel
 import com.suda.datetimewallpaper.ui.about.AboutActivity
 import com.suda.datetimewallpaper.util.*
 import kotlinx.android.synthetic.main.activity_home.*
-import kotlinx.android.synthetic.main.home_content.*
+import kotlinx.android.synthetic.main.layout_home_content.*
 import me.drakeet.materialdialog.MaterialDialog
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
@@ -117,7 +117,7 @@ class HomeActivity : BaseAct(), NavigationView.OnNavigationItemSelectedListener 
         if (EasyPermissions.hasPermissions(this, *perms)) {
             val outDialog = MaterialDialog(this)
             outDialog.setTitle(R.string.select_conf)
-            val viewGroup = LayoutInflater.from(this).inflate(R.layout.cus_conf_layout, null) as ViewGroup
+            val viewGroup = LayoutInflater.from(this).inflate(R.layout.layout_cus_conf, null) as ViewGroup
             val listView = viewGroup.findViewById<ListView>(R.id.conf_list)
             val restoreAdapter = CusAdapter()
             listView.onItemLongClickListener = AdapterView.OnItemLongClickListener { parent, view, position, id ->
