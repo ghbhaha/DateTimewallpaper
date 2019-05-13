@@ -35,7 +35,6 @@
     <string name="cancel">取消</string>
     <string name="thanks_for_support">谢谢支持</string>
     <string name="next_time">下次再说</string>
-    <string name="copy_code">领红包</string>
     <string name="donate_tip">软件完全免费，如果您觉得软件不错，可以打赏支持，或者打开支付宝首页搜“521043031”领红包哦</string>
     <string name="want_donate">我要打赏</string>
     <string name="conf_error">您的配置有问题</string>
@@ -45,10 +44,7 @@
     <string name="set_wallpaper_cancel">取消设置动态壁纸</string>
     <string name="version_low">您的系统版本过低，暂不支持本功能~</string>
     <string name="delete_conf">是否删除%s?</string>
-    <plurals name="error_over_count">
-        <item quantity="one">You can only select one media file</item>
-        <item quantity="many">You can only select up to %1$d media files</item>
-    </plurals>
+
     <string name="title_activity_home">@string/app_name</string>
 
     <string name="switch_conf_tip">桌面连续点3次切换配置</string>
@@ -98,7 +94,6 @@
 
     <string name="edit_name">修改名字</string>
     <string name="delete">删除</string>
-    <string name="group">QQ群</string>
     <string name="ok">确认</string>
 
 </resources>

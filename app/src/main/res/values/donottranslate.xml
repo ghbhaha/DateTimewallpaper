@@ -8,4 +8,11 @@
     <string name="xw">"下午"</string>
     <string name="bw">"晚上"</string>
     <string name="sy">"深夜"</string>
+    <plurals name="error_over_count">
+        <item quantity="one">You can only select one media file</item>
+        <item quantity="many">You can only select up to %1$d media files</item>
+    </plurals>
+    <string name="copy_code">领红包</string>
+    <string name="group">QQ群</string>
+
 </resources>

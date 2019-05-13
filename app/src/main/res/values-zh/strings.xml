@@ -44,7 +44,7 @@
         <item quantity="many">You can only select up to %1$d media files</item>
     </plurals>
 
-    <string name="click_change">百变轮盘</string>
+    <string name="click_change">三击切换</string>
     <string name="click_change_summary">通过三击桌面切换配置</string>
 
     <string name="hide_from_recent">任务隐藏</string>

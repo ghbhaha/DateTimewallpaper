@@ -79,8 +79,8 @@ class DateTimeDrawer {
     private var monthIndex = 0
     private var dayIndex = 0
     private var weekIndex = 0
-    internal var secondDelta = 0f
-    internal var secondIndex = 0
+    private var secondDelta = 0f
+    private var secondIndex = 0
     private var amOrPm = 0
     private var hourIndex = 0
     private var minusIndex = 0
@@ -401,13 +401,13 @@ class DateTimeDrawer {
                 curIndex = hourIndex % textBean.array.size
             }
             "hour_23_23" -> {
-                hourIndex = hourIndex + 1
-                if (hourIndex == 23) {
-                    curIndex = 0
+                hourIndex += 1
+                curIndex = if (hourIndex == 23 || hourIndex == 24) {
+                    0
                 } else if (hourIndex % 2 == 1) {
-                    curIndex = (hourIndex + 1) / 2
+                    (hourIndex + 1) / 2
                 } else {
-                    curIndex = hourIndex / 2
+                    hourIndex / 2
                 }
             }
             "minute" -> {
