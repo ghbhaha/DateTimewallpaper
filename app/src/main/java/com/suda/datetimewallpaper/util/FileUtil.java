@@ -44,6 +44,10 @@ public class FileUtil {
 
     public static void copyFile(File sourceFile, File targetFile)
             throws IOException {
+
+        if (targetFile.exists()){
+            targetFile.delete();
+        }
         // 新建文件输入流并对它进行缓冲
         FileInputStream input = new FileInputStream(sourceFile);
         BufferedInputStream inBuff = new BufferedInputStream(input);

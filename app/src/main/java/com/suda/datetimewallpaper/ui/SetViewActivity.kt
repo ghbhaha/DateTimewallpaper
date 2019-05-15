@@ -4,9 +4,12 @@ import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.graphics.Bitmap
 import android.graphics.Color
+import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,8 +20,8 @@ import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.adapter.CusAdapter
 import com.suda.datetimewallpaper.base.BaseAct
 import com.suda.datetimewallpaper.util.*
-import com.suda.datetimewallpaper.util.FileUtil.copyFile
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil.*
+import com.yalantis.ucrop.UCrop
 import com.zhihu.matisse.Matisse
 import com.zhihu.matisse.MimeType
 import kotlinx.android.synthetic.main.activity_set_view.*
@@ -26,7 +29,6 @@ import me.drakeet.materialdialog.MaterialDialog
 import pub.devrel.easypermissions.AfterPermissionGranted
 import pub.devrel.easypermissions.EasyPermissions
 import java.io.File
-import java.io.IOException
 import java.util.*
 
 /**
@@ -48,6 +50,8 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
     val sharedPreferencesUtil by lazy {
         SharedPreferencesUtil(this, paperId)
     }
+
+    private var orgName = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -285,12 +289,16 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
 
                                     AlipayDonate.donateTip("usecus", 2, this@SetViewActivity)
 
-                                    Toast.makeText(this@SetViewActivity,
-                                        R.string.import_success, Toast.LENGTH_SHORT)
+                                    Toast.makeText(
+                                        this@SetViewActivity,
+                                        R.string.import_success, Toast.LENGTH_SHORT
+                                    )
                                         .show()
                                 } else {
-                                    Toast.makeText(this@SetViewActivity,
-                                        R.string.import_fail, Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(
+                                        this@SetViewActivity,
+                                        R.string.import_fail, Toast.LENGTH_SHORT
+                                    ).show()
                                 }
                             } else {
                                 Toast.makeText(this@SetViewActivity, R.string.import_fail, Toast.LENGTH_SHORT).show()
@@ -394,15 +402,27 @@ class SetViewActivity : BaseAct(), SeekBar.OnSeekBarChangeListener, ColorPickerD
                 Toast.makeText(this, R.string.set_wallpaper_cancel, Toast.LENGTH_SHORT).show()
             }
         } else if (requestCode == REQUEST_CODE_CHOOSE && resultCode == Activity.RESULT_OK) {
+            val outMetrics = DisplayMetrics()
+            windowManager.defaultDisplay.getMetrics(outMetrics)
             val org = File(Matisse.obtainPathResult(data!!)[0])
-            val dst = File(filesDir, org.name)
-            try {
-                copyFile(org, dst)
-                sharedPreferencesUtil.putData(SP_BG_IMAGE, dst.absolutePath)
-            } catch (e: IOException) {
-                e.printStackTrace()
+            orgName = org.name
+            val tmp = File(filesDir, "tmp")
+            if (tmp.exists()) {
+                tmp.delete()
             }
-
+            val option = com.yalantis.ucrop.UCrop.Options()
+            option.setCompressionFormat(Bitmap.CompressFormat.PNG)
+            option.setMaxBitmapSize(10000)
+            option.setFreeStyleCropEnabled(true)
+            UCrop.of(Uri.fromFile(org), Uri.fromFile(tmp))
+                .withOptions(option)
+                .withMaxResultSize(outMetrics.widthPixels, outMetrics.heightPixels)
+                .start(this);
+        } else if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
+            var resultUri = UCrop.getOutput(data!!);
+            val dst = File(filesDir, orgName)
+            FileUtil.copyFile(File(resultUri!!.path), dst)
+            sharedPreferencesUtil.putData(SP_BG_IMAGE, dst.path)
         }
     }
 

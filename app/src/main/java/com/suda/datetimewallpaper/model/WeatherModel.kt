@@ -22,7 +22,7 @@ class WeatherModel {
                 val request = Request.Builder().url(String.format(WEATHER_URL, areaid)).get().build()
                 val call = App.GLOBAL_OK_HTTP.newCall(request)
                 val response = call.execute()
-                val result = JSON.parseObject(response.body().string())
+                val result = JSON.parseObject(response.body()!!.string())
 
                 val realtime = result.getJSONObject("realtime")
                 val realWeather = RealWeather()

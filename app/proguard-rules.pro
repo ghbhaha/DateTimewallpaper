@@ -368,5 +368,7 @@ public static java.lang.String TABLENAME;
 public static final int *;
 }
 
-
 -keep class com.suda.datetimewallpaper.bean.** { *;}
+-dontwarn com.yalantis.ucrop**
+-keep class com.yalantis.ucrop** { *; }
+-keep interface com.yalantis.ucrop** { *; }

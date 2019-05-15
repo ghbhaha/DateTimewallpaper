@@ -70,6 +70,10 @@
                 android:name=".ui.WebActivity"
                 android:label="@string/title_activity_import_net"
                 android:screenOrientation="portrait"/>
+        <activity
+                android:name="com.yalantis.ucrop.UCropActivity"
+                android:screenOrientation="portrait"
+                android:theme="@style/Theme.AppCompat.Light.NoActionBar"/>
         <service
                 android:name=".service.LiveWallPaperService"
                 android:permission="android.permission.BIND_WALLPAPER">
