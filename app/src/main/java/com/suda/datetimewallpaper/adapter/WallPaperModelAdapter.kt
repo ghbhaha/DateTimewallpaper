@@ -12,6 +12,8 @@ import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.suda.datetimewallpaper.R
 import com.suda.datetimewallpaper.bean.WallPaperModel
+import com.suda.datetimewallpaper.service.WidgetRefreshService1
+import com.suda.datetimewallpaper.service.WidgetRefreshService2
 import com.suda.datetimewallpaper.ui.SetViewActivity
 import com.suda.datetimewallpaper.util.SharedPreferencesUtil
 import me.drakeet.materialdialog.MaterialDialog
@@ -56,6 +58,18 @@ class WallPaperModelAdapter(val wallpaperModels: MutableList<WallPaperModel>) :
                 val intent = Intent(it.context, SetViewActivity::class.java)
                 intent.putExtra("paperId", wallpaperModels[position].paperId)
                 it.context.startActivity(intent)
+                dialog.cancel()
+            }
+
+
+            contentView.findViewById<View>(R.id.reset_widget).setOnClickListener {
+                SharedPreferencesUtil(it.context).lastWidgetId = wallpaperModels[position].paperId
+                val intent = Intent(it.context, WidgetRefreshService1::class.java)
+                intent.putExtra("command", 1)
+                it.context.startService(intent)
+                val intent2 = Intent(it.context, WidgetRefreshService2::class.java)
+                intent2.putExtra("command", 1)
+                it.context.startService(intent2)
                 dialog.cancel()
             }
 

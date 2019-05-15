@@ -48,7 +48,7 @@ class DateTimeDrawer {
     private var context: Context? = null
     private val clockPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private val centerPaint = Paint(Paint.ANTI_ALIAS_FLAG)
-    private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG)
+    private val bgPaint = Paint(Paint.ANTI_ALIAS_FLAG and Paint.DITHER_FLAG)
     private var surfaceHolder: SurfaceHolder? = null
     private val textMatrix = Matrix()
     private val bgMatrix = Matrix()
@@ -62,7 +62,7 @@ class DateTimeDrawer {
     private var horizontalPos = 0.5f
 
     private var rotate = 0f
-    private var scale = 0f
+    private var scale = 1f
 
     private var textColor = Color.WHITE
     private var darkenTextColor = Color.WHITE
@@ -128,6 +128,8 @@ class DateTimeDrawer {
 
     private var advanceAmPm = 0
 
+    var isWidget = false
+
     /**
      * 是否中文环境
      */
@@ -144,77 +146,85 @@ class DateTimeDrawer {
 
     private val refreshTask = object : TimerTask() {
         override fun run() {
-            val currentTimeInMillis = System.currentTimeMillis()
-            mCurCalendar.timeInMillis = currentTimeInMillis
-            monthIndex = mCurCalendar.get(Calendar.MONTH)
-            dayIndex = mCurCalendar.get(Calendar.DATE) - 1
-            weekIndex = mCurCalendar.get(Calendar.DAY_OF_WEEK) - 1
-            hourIndex = mCurCalendar.get(Calendar.HOUR_OF_DAY) - 1
-            amOrPm = mCurCalendar.get(Calendar.AM_PM)
-            minusIndex = mCurCalendar.get(Calendar.MINUTE) - 1
-            secondIndex = mCurCalendar.get(Calendar.SECOND) - 1
-            current = mCurCalendar.time
-
-            while (paramChanges.size > 0) {
-                paramChanges.removeAt(0).run()
-            }
-
-            if (lastHourIndex != hourIndex) {
-                lunarCalendar = LunarCalendar(mCurCalendar)
-                simpleDateFormatMap.clear()
-                lastHourIndex = hourIndex
-            }
-
-            if (hourIndex == -1) {
-                hourIndex = 23
-            }
-
-            if (minusIndex == -1) {
-                minusIndex = 59
-            }
-
-            if (secondIndex == -1) {
-                secondIndex = 59
-            }
-
-            var hours = mCurCalendar.get(Calendar.HOUR)
-            advanceAmPm = if (amOrPm == Calendar.AM) {
-                when {
-                    hours < 5 -> 0
-                    hours in 5..6 -> 1
-                    hours in 7..8 -> 2
-                    hours in 9..11 -> 3
-                    else -> 0
-                }
-            } else {
-                when {
-                    hours == 0 -> 4
-                    hours < 6 -> 5
-                    hours in 6..9 -> 6
-                    hours in 10..11 -> 7
-                    hours == 12 -> 4
-                    else -> 4
-                }
-            }
-
-            //处理动画
-            var sd = if (rotateForever) {
-                currentTimeInMillis % 1000 / 1000f
-            } else {
-                currentTimeInMillis % 1000 / 500f
-            }
-
-            //静止时不再绘制，降低功耗
-            if (secondDelta == 0f && sd >= 1 && !changeConf && weatherDrawer == null) {
-                return
-            }
-            changeConf = false
-            secondDelta = sd
-            if (sd >= 1f) {
-                secondDelta = 1f
-            }
-            secondDelta -= 1
+            resetTime()
             onDraw()
+        }
+    }
+
+    fun resetTime() {
+        val currentTimeInMillis = System.currentTimeMillis()
+        mCurCalendar.timeInMillis = currentTimeInMillis
+        monthIndex = mCurCalendar.get(Calendar.MONTH)
+        dayIndex = mCurCalendar.get(Calendar.DATE) - 1
+        weekIndex = mCurCalendar.get(Calendar.DAY_OF_WEEK) - 1
+        hourIndex = mCurCalendar.get(Calendar.HOUR_OF_DAY) - 1
+        amOrPm = mCurCalendar.get(Calendar.AM_PM)
+        minusIndex = mCurCalendar.get(Calendar.MINUTE) - 1
+        secondIndex = mCurCalendar.get(Calendar.SECOND) - 1
+        current = mCurCalendar.time
+
+        while (paramChanges.size > 0) {
+            paramChanges.removeAt(0).run()
+        }
+
+        if (lastHourIndex != hourIndex) {
+            lunarCalendar = LunarCalendar(mCurCalendar)
+            simpleDateFormatMap.clear()
+            lastHourIndex = hourIndex
+        }
+
+        if (hourIndex == -1) {
+            hourIndex = 23
+        }
+
+        if (minusIndex == -1) {
+            minusIndex = 59
+        }
+
+        if (secondIndex == -1) {
+            secondIndex = 59
+        }
+
+        var hours = mCurCalendar.get(Calendar.HOUR)
+        advanceAmPm = if (amOrPm == Calendar.AM) {
+            when {
+                hours < 5 -> 0
+                hours in 5..6 -> 1
+                hours in 7..8 -> 2
+                hours in 9..11 -> 3
+                else -> 0
+            }
+        } else {
+            when {
+                hours == 0 -> 4
+                hours < 6 -> 5
+                hours in 6..9 -> 6
+                hours in 10..11 -> 7
+                hours == 12 -> 4
+                else -> 4
+            }
+        }
+
+        //处理动画
+        var sd = if (rotateForever) {
+            currentTimeInMillis % 1000 / 1000f
+        } else {
+            currentTimeInMillis % 1000 / 500f
+        }
+
+        //静止时不再绘制，降低功耗
+        if (secondDelta == 0f && sd >= 1 && !changeConf && weatherDrawer == null) {
+            return
+        }
+        changeConf = false
+        secondDelta = sd
+        if (sd >= 1f) {
+            secondDelta = 1f
+        }
+        secondDelta -= 1
+
+        if (isWidget) {
+            secondDelta = 0f
         }
     }
 
@@ -251,7 +261,7 @@ class DateTimeDrawer {
         }
     }
 
-    private fun drawCenter(canvas: Canvas, cameraMatrix: Matrix) {
+    fun drawCenter(canvas: Canvas, cameraMatrix: Matrix) {
         centerPaint.textSize = drawBean!!.centerTextSize * 1.0f / drawBean!!.centerText.size
         centerPaint.color = textColor
         val fontMetrics = centerPaint.fontMetrics
@@ -328,7 +338,7 @@ class DateTimeDrawer {
     /**
      * @param canvas
      */
-    private fun drawCircle(canvas: Canvas, cameraMatrix: Matrix) {
+    fun drawCircle(canvas: Canvas, cameraMatrix: Matrix) {
         drawBean!!.circleText.forEach {
             val index = getIndex(it)
             clockPaint.isFakeBoldText = it.bold == 1
@@ -444,7 +454,7 @@ class DateTimeDrawer {
      * @param context
      * @param userHardCanvas
      */
-    fun init(holder: SurfaceHolder, context: Context, userHardCanvas: Boolean, paperId: Long) {
+    fun init(holder: SurfaceHolder?, context: Context, userHardCanvas: Boolean, paperId: Long) {
         this.sharedPreferencesUtil = SharedPreferencesUtil(context, paperId)
         this.useHardCanvas = userHardCanvas
         this.canUseHardCanvas = !OSHelper.isMIUI()
@@ -489,12 +499,16 @@ class DateTimeDrawer {
             perspectiveMode = SharedPreferencesUtil.getAppDefault(context).getData("perspective_mode", false)
 
 
-            verticalPos = sharedPreferencesUtil?.getData(SP_VERTICAL_POS, 0.5f) as Float
-            horizontalPos = sharedPreferencesUtil?.getData(SP_HORIZONTAL_POS, 0.5f) as Float
-            rotate = sharedPreferencesUtil?.getData(SP_ROTATE, 0f) as Float
-
+            if (!isWidget) {
+                verticalPos = sharedPreferencesUtil?.getData(SP_VERTICAL_POS, 0.5f) as Float
+                horizontalPos = sharedPreferencesUtil?.getData(SP_HORIZONTAL_POS, 0.5f) as Float
+                rotate = sharedPreferencesUtil?.getData(SP_ROTATE, 0f) as Float
+            }
             scale =
-                (2 * sharedPreferencesUtil?.getData(SP_SCALE, 0.25f) as Float + 0.5f) * 0.52f * (surfaceWidth / 1080f)
+                (2 * sharedPreferencesUtil?.getData(
+                    SP_SCALE,
+                    0.25f
+                ) as Float + 0.5f) * 0.52f * (surfaceWidth / 1080f)
 
             textColor = sharedPreferencesUtil?.getData(SP_TEXT_COLOR, Color.WHITE) as Int
             darkenTextColor = sharedPreferencesUtil?.getData(SP_TEXT_COLOR_DARK, textColor.dark()) as Int
@@ -502,7 +516,10 @@ class DateTimeDrawer {
                 drawConfName = ""
             }
             resetJsonConf()
-            setBg()
+
+            if (!isWidget) {
+                setBg()
+            }
 
             circleBaseline = 0f
             lastHourIndex = -1
@@ -625,7 +642,7 @@ class DateTimeDrawer {
             val bitmap = BitmapFactory.decodeFile(tmpBg, options)
             bgBitmap = Bitmap.createBitmap(surfaceWidth, surfaceHeight, Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bgBitmap!!)
-            canvas.drawBitmap(bitmap, matrix, Paint())
+            canvas.drawBitmap(bitmap, matrix, bgPaint)
         } else if (TextUtils.isEmpty(tmpBg)) {
             bgBitmap = null
         }
@@ -762,7 +779,7 @@ class DateTimeDrawer {
 
     ////////////////weatherDrawer start////////////////////
 
-    private fun refreshWeather() {
+    fun refreshWeather() {
         weatherDrawer = null
         val sp = SharedPreferencesUtil.getAppDefault(context)
         val dynamic = sp.getData("weather_settings_dynamic", true)

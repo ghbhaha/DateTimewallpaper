@@ -208,6 +208,19 @@ public class SharedPreferencesUtil {
         return last;
     }
 
+    public long getLastWidgetId() {
+        long last = sp.getLong("last_widget", -1L);
+        if (last == -1) {
+            List<WallPaperModel> wallPaperModels = getWallpapermodels();
+            last = wallPaperModels.get(0).getPaperId();
+        }
+        return last;
+    }
+
+    public void setLastWidgetId(long lastWidgetId) {
+        sp.edit().putLong("last_widget", lastWidgetId).apply();
+    }
+
     public long getNextWallPaper() {
         List<WallPaperModel> wallPaperModels = getWallpapermodels();
         long last = sp.getLong("last", -1L);

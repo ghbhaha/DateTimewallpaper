@@ -16,6 +16,7 @@
     <string name="bg_color">背景颜色</string>
     <string name="bg_img">背景图片</string>
     <string name="set_wallpaper">设置壁纸</string>
+    <string name="reset_widget">重置插件</string>
     <string name="local_conf">本地配置</string>
     <string name="import_net_conf">导入网络配置</string>
     <string name="about">关于</string>

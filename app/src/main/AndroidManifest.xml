@@ -66,9 +66,10 @@
                 android:name=".ui.SettingsActivity"
                 android:label="@string/title_activity_settings"
                 android:screenOrientation="portrait"/>
-        <activity android:name=".ui.WebActivity"
-                  android:label="@string/title_activity_import_net"
-                  android:screenOrientation="portrait"/>
+        <activity
+                android:name=".ui.WebActivity"
+                android:label="@string/title_activity_import_net"
+                android:screenOrientation="portrait"/>
         <service
                 android:name=".service.LiveWallPaperService"
                 android:permission="android.permission.BIND_WALLPAPER">
@@ -99,15 +100,39 @@
         <meta-data
                 android:name="UMENG_CHANNEL"
                 android:value="${UMENG_CHANNEL_VALUE}"/>
-
-
         <meta-data
                 android:name="com.amap.api.v2.apikey"
                 android:value="7e0daacc3ca47e7dcffbe64888433232"/>
 
-        <service android:name="com.amap.api.location.APSService"></service>
+        <service android:name="com.amap.api.location.APSService"/>
+        <service
+                android:name=".service.WidgetRefreshService1"
+                android:enabled="true">
+        </service>
+        <service
+                android:name=".service.WidgetRefreshService2"
+                android:enabled="true">
+        </service>
+        <receiver android:name=".service.WidgetProvider1">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="WIDGET_BROADCAST"/>
+            </intent-filter>
 
+            <meta-data
+                    android:name="android.appwidget.provider"
+                    android:resource="@xml/mywidget_1"/>
+        </receiver>
+        <receiver android:name=".service.WidgetProvider2">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="WIDGET_BROADCAST"/>
+            </intent-filter>
 
+            <meta-data
+                    android:name="android.appwidget.provider"
+                    android:resource="@xml/mywidget_2"/>
+        </receiver>
     </application>
 
 </manifest>

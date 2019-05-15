@@ -19,6 +19,17 @@
 
     <Button
             android:layout_width="match_parent"
+            android:text="@string/reset_widget"
+            android:clickable="true"
+            android:id="@+id/reset_widget"
+            android:textSize="15sp"
+            android:gravity="left|center_vertical"
+            android:background="@android:color/transparent"
+            android:textColor="@color/black_de"
+            android:layout_height="wrap_content"/>
+
+    <Button
+            android:layout_width="match_parent"
             android:text="@string/edit_name"
             android:clickable="true"
             android:id="@+id/edit_name"
