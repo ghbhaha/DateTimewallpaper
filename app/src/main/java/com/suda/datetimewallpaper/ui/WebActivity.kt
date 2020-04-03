@@ -30,7 +30,7 @@ class WebActivity : BaseAct() {
         web_view.settings.userAgentString = "sudajs"
         web_view.settings.cacheMode = WebSettings.LOAD_DEFAULT;
 
-        web_view.loadUrl("https://timeconf.sudamod.site/")
+        web_view.loadUrl("https://timeconf.sudavideo.site/")
         web_view.addJavascriptInterface(JSInterface(), "sudajs")
 
         val loadDialog = MaterialDialog(this@WebActivity)
